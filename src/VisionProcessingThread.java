@@ -10,6 +10,7 @@ import magick.util.*;
 
 public class VisionProcessingThread extends Thread{
     
+    private Dimension m_camRes = new Dimension(640, 480);
 	private CameraInterface m_webcam;
 	private MagickImage m_image;
 	private boolean m_running = true;
@@ -19,7 +20,7 @@ public class VisionProcessingThread extends Thread{
     }
     public VisionProcessingThread(String name){
         super(name);
-        m_webcam = new CameraInterface();
+        m_webcam = new CameraInterface(1, m_camRes);
     }
     
     public void run() {
