@@ -20,7 +20,7 @@ public class VisionProcessingThread extends Thread{
     }
     public VisionProcessingThread(String name){
         super(name);
-        m_webcam = new CameraInterface(1, m_camRes);
+        m_webcam = new CameraInterface(m_camRes);
     }
     
     public void run() {
