@@ -25,6 +25,7 @@ public class VisionServerThread extends Thread
             while(running){
                 try{
                     
+                    socket = new DatagramSocket(31415);
                     
                     DatagramPacket packet = new DatagramPacket(buf,buf.length);
                     socket.receive(packet);

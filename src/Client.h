@@ -1,15 +1,20 @@
 #ifndef SRC_CLIENT_H_
 #define SRC_CLIENT_H_
-#include "WPILib.h"
+
 
 class Client {
+public:
+    static double m_targetPosition;
+    static char m_receivedData[];
+    static bool receive;
 
-	public static double m_targetPosition;
-	Client();
+    Client();
 
-	void sendPacket();
+    void receivePacket(void*);
 
-	virtual ~Client();
+    void sendPacket();
+
+    virtual ~Client();
 
 };
 
