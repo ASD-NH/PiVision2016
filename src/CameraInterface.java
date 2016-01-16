@@ -1,7 +1,9 @@
 import java.awt.Dimension;
 import java.awt.image.*;
 import com.github.sarxos.webcam.Webcam;
-import magick.*;
+
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.*;
 
 public class CameraInterface {
 
@@ -26,6 +28,7 @@ public class CameraInterface {
 		            "x" + m_supportedResolutions[i].height);
 		}
 		
+		//Change resolution
 		System.out.println("Attempting to change resolution to " + 
 		                    resolution.width + "x" + resolution.height);
 		m_webcam.setViewSize(resolution);
@@ -34,29 +37,19 @@ public class CameraInterface {
 		m_webcam.open();
 	}
 	
-	//Convert image format received from webcam to a format that can be operated on
-	private MagickImage toMagickImage(BufferedImage bi) {
-		
-		//create raw data from buffered image
-		Object data = null;
-	    int w = bi.getWidth();
-	    int h = bi.getHeight();
-	    data = ((DataBufferByte)bi.getRaster().getDataBuffer()).getData();
-	    
-	    //use raw data to make a MagickImage
-	    MagickImage converted = new MagickImage();
-	    try {
-			converted.constituteImage(w,h,"RGB",(byte[])data);
-		} catch (MagickException e) {
-			System.out.println("Error converting BufferedImage to MagickImage. Check camera input.");
-		}
-	    
-	    return converted;
+	//converts source image type to boof type
+	private MultiSpectral<ImageUInt8> toMultiSpectral(BufferedImage input) {
+	    MultiSpectral<ImageUInt8> output = ConvertBufferedImage.convertFromMulti(
+	            input,
+	            null,
+	            true,
+	            ImageUInt8.class);
+	    return output;
 	}
 	
-	public MagickImage getImage() {
+	public MultiSpectral<ImageUInt8> getImage() {
 		//return converted image
-		return toMagickImage(m_webcam.getImage());
+		return toMultiSpectral(m_webcam.getImage());
 	}
 
 }
