@@ -13,4 +13,4 @@ For Webcam-capture, download the latest release (v0.3.10), then unzip somewhere 
 
 On the Raspberry Pi, replace the included BridJ version with the jar found [here](https://oss.sonatype.org/content/repositories/snapshots/com/nativelibs4java/bridj/0.6.3-SNAPSHOT/bridj-0.6.3-20130316.190111-13.jar) (needs testing).
 
-####TODO: JMagick information
+To install JMagick, download the relevant release from the server [here](http://www.jmagick.org/6.4.0/). This is probably the linux version ([link](http://www.jmagick.org/6.4.0/jmagick-linux-6.4.0-Q8.tar.gz))
