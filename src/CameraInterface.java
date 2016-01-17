@@ -38,18 +38,11 @@ public class CameraInterface {
 	}
 	
 	//converts source image type to boof type
-	private MultiSpectral<ImageUInt8> toMultiSpectral(BufferedImage input) {
-	    MultiSpectral<ImageUInt8> output = ConvertBufferedImage.convertFromMulti(
-	            input,
-	            null,
-	            true,
-	            ImageUInt8.class);
-	    return output;
-	}
+	
 	
 	public MultiSpectral<ImageUInt8> getImage() {
 		//return converted image
-		return toMultiSpectral(m_webcam.getImage());
+		return ImageConversion.toMultiSpectral(m_webcam.getImage());
 	}
 
 }

@@ -5,6 +5,7 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.MultiSpectral;
 
 public class MultiSpectralDisplay {
