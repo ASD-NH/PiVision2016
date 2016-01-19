@@ -17,12 +17,12 @@ import boofcv.io.image.ConvertBufferedImage;
 public class VisionProcessingThread extends Thread{
     
     //Camera quality values
-    static final Dimension MAX = new Dimension(640, 480);
-    static final Dimension MED = new Dimension(320, 240);
-    static final Dimension MIN = new Dimension(176, 144);
+    private static final Dimension MAX = new Dimension(640, 480);
+    private static final Dimension MED = new Dimension(320, 240);
+    private static final Dimension MIN = new Dimension(176, 144);
     
     //set camera resolution
-    private Dimension m_camRes = MAX;
+    private Dimension m_camRes = MED;
     
     //core interface and webcam variables
 	private CameraInterface m_webcam;
@@ -41,7 +41,7 @@ public class VisionProcessingThread extends Thread{
     public VisionProcessingThread(String name){
         super(name);
         //init webcam
-        m_webcam = new CameraInterface(1, m_camRes);
+        m_webcam = new CameraInterface(m_camRes);
         //init display
         m_display = new MultiSpectralDisplay(m_camRes);
     }
@@ -51,9 +51,11 @@ public class VisionProcessingThread extends Thread{
     		//m_image is the current webcam image
     		m_image = m_webcam.getImage();
     		
+    		//sets m_hsvImage to the rgb --> hsv conversion result
     		ColorHsv.rgbToHsv_F32(
     		        ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
     		        m_hsvImage);
+    		//reduce precision to UInt8 for display
     		m_image = ImageConversion.MultiSpectralFloat32ToUInt8(m_hsvImage);
     		
     		//debug display update image
