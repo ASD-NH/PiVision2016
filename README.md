@@ -9,7 +9,14 @@ This is the repository for all java code running on our Raspberry Pi coprocessor
 
 ## Installing Dependencies
 
-For Webcam-capture, download the latest release (v0.3.10), then unzip somewhere safe on your computer. Next go to Eclipse, right click the project, and click `Build Path --> Add External Archives`, then select `webcam-capture-0.3.10.jar` in the folder you extracted. Repeat the process for `slf4j-api-1.7.2.jar` and `bridj-0.6.2.jar` (found in the `lib` subdirectory).
-On the Raspberry Pi, replace the included BridJ version with the jar found [here](https://oss.sonatype.org/content/repositories/snapshots/com/nativelibs4java/bridj/0.6.3-SNAPSHOT/bridj-0.6.3-20130316.190111-13.jar) (needs testing).
+In Eclipse, right click on your copy of the PiVision2016 project, then go to `Build Path --> Add External Archives`. From here, navigate to your Eclipse workspace, and then to `PiVision2016/libs` and select the `.jars` immediately inside of the folder (ignore the `boofcv` folder for now). Hit OK.
 
-The installation is similar for BoofCV. Download the compiled and source JARs from [here](http://boofcv.org/index.php?title=Download), and then extract them somewhere safe. Next, go to Eclipse and right click on the PiVision folder, going to `Build path --> Add Libraries`. Select `User Library`, next, and then on the next screen hit the `User Libraries` button. From here, hit `Add External JARs` and navigate to and select all of the files in the BoofCV directory, and then hit OK. Name it something useful like `boofcv`. Click OK on the `User Library` screen, and then check the box next to the library you just made. Then hit finish.
+Next, right click on the project again, and go to `Build Path --> Add Libaries`. Select `User Library`. On the next screen, hit the `User Libraries Button`. From here, hit `Add External JARs` and select all the files in that `boofcv` folder we saw earlier (inside libs). Hit okay, name the library `boofcv`, and then click OK on the `User Library` screen. Now, just check the box next to the library you just made and hit finish.
+
+##Deploying to Pi
+
+* Uncomment out the line in VisionServer.java relating to the webcam driver
+* In Eclipse, go to `File --> Export` and select "Runnable JAR file". Hit Next, and then ensure that the Launch configuration is set to `VisionServer - PiVision2016`. Set the export destination to somewhere convenient on your computer
+* Hit Finish, and then OK on any subsequent dialogs.
+* Either copy the created JAR manually to the Pi, or use the `scp` command to transfer the file over the LAN. To transfer using `scp`, open up a terminal and run `scp PiVision2016.jar pi@IP-HERE:~/Desktop/PiVision2016.jar` while in the directory with the JAR you created. Make sure to replace the IP with the Pi's IP address. The password is `team2342`
+* Run the JAR either manually or through SSH with `java -jar Desktop/PiVision.jar`. Again, the password is `team2342`.
