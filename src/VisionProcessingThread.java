@@ -72,7 +72,9 @@ public class VisionProcessingThread extends Thread{
     		
     		
     		if (m_displayDisplay) {
-    		    //reduce precision to UInt8 for display
+    			//Convert the HSV image to RGB temporarily.
+    			ColorHsv.hsvToRgb_F32(m_hsvImage, m_hsvImage);
+    			 //reduce precision to UInt8 for display
                 m_image = ImageConversion.MultiSpectralFloat32ToUInt8(m_hsvImage);
                 //debug display update image
     		    m_display.setImageRGB(m_image);
