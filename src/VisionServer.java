@@ -12,9 +12,7 @@ public class VisionServer{
     
     public static void main(String[] args) throws IOException
     {
-        //run set functions on VisionProcessingThread depending on # of args
-        if (args.length == 3 && VisionProcessingThread.checkArgs(args)) {
-            
+        
             new VisionServerThread().start();
             System.out.println("Thread Started");
             
@@ -66,6 +64,8 @@ public class VisionServer{
             VisionProcessingThread.m_displayDisplay = Boolean.parseBoolean("false");
             //new VisionProcessingThread().start();
         }
+            ParseArguments.parse(args);
+            new VisionProcessingThread().start();
         
     }
         
