@@ -9,9 +9,9 @@ This is the repository for all java code running on our Raspberry Pi coprocessor
 
 ## Installing Dependencies
 
-In Eclipse, right click on your copy of the PiVision2016 project, then go to `Build Path --> Add External Archives`. From here, navigate to your Eclipse workspace, and then to `PiVision2016/libs` and select the `.jars` immediately inside of the folder (ignore the `boofcv` folder for now). Hit OK.
+In Eclipse, right click on your copy of the PiVision2016 project, then go to `Build Path --> Add External Archives`. From here, navigate to your Eclipse workspace, and then to `PiVision2016/libs` and select the all of the `.jars` (Executable Jar Files) immediately inside of the folder (ignore the `boofcv` folder for now). Hit OK (Open on Windows machines).
 
-Next, right click on the project again, and go to `Build Path --> Add Libaries`. Select `User Library`. On the next screen, hit the `User Libraries Button`. From here, hit `Add External JARs` and select all the files in that `boofcv` folder we saw earlier (inside libs). Hit okay, name the library `boofcv`, and then click OK on the `User Library` screen. Now, just check the box next to the library you just made and hit finish.
+Next, right click on the project again, and go to `Build Path --> Add Libaries`. Select `User Library`. On the next screen, hit the `User Libraries Button`. Select the '`New..` button and type boofcv, then hit OK. From here, hit `Add External JARs` and select all the files in that `boofcv` folder we saw earlier (inside libs). Hit okay, name the library `boofcv`, and then click OK on the `User Library` screen. Now, just check the box next to the library you just made and hit finish.
 
 ##Deploying to Pi
 
