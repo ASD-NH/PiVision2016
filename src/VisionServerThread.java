@@ -4,11 +4,13 @@ import java.util.*;
 
 public class VisionServerThread extends Thread
 {
-    protected DatagramSocket socket = null;
+    public static DatagramSocket socket = null;
     private boolean running = true;
-    public int port = 00000;
-    public InetAddress address = null;
-    
+    public static int port = 00000;
+    public static InetAddress address = null;
+    DatagramPacket receivePacket;
+    byte[] receivedData = new byte[1024]; 
+
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -20,17 +22,17 @@ public class VisionServerThread extends Thread
     }
     public VisionServerThread(String name) throws IOException{
         super(name);
-        
         //Error catching
         while (!errorFree) {
             //open socket cannot be found, break
-            if (currSocket - baseSocket > 10) {
+            if (currSocket - baseSocket > 50) {
                 System.out.println("[ERROR] Open socket could not be found, aborting thread");
                 break;
             }
             try {
                 errorFree = true;
                 socket = new DatagramSocket(currSocket);
+                System.out.println("Socket Initilized at: " + currSocket);
             } catch (BindException e) {
                 errorFree = false;
                 currSocket += 1;
@@ -39,6 +41,7 @@ public class VisionServerThread extends Thread
         }
         
     }
+  
     public void run(){
         if (socket == null){
             return;
@@ -47,20 +50,17 @@ public class VisionServerThread extends Thread
             byte[] buf = new byte[1024];
             while(running){
                 try{
+                    System.out.println("Waiting to Receive Packet");
+                    receivePacket = new DatagramPacket(buf,buf.length);
+                    socket.receive(receivePacket);
                     
-                    //99% sure this is extraneous code, delete at leisure
-                    //(socket is already initialized in the constructor)
-                    //socket = new DatagramSocket(31415);
+                    System.out.println("Packet Received");
                     
-                    DatagramPacket packet = new DatagramPacket(buf,buf.length);
-                    socket.receive(packet);
+                    address = receivePacket.getAddress();
+                    port = receivePacket.getPort();
+                    receivedData = receivePacket.getData();
                     
-                    address = packet.getAddress();
-                    port = packet.getPort();
-                    byte[] receivedPacket =  new byte[1024];
-                    receivedPacket = packet.getData();
-                    
-                    if (Arrays.toString(receivedPacket) == "start"){
+                    if (Arrays.toString(receivedData) == "start"){
                         String response = "Hello world";
                         buf = response.getBytes();
                     }
@@ -71,14 +71,22 @@ public class VisionServerThread extends Thread
                     
                     DatagramPacket responsePacket = new DatagramPacket(buf,buf.length,address,port);
                     socket.send(responsePacket);
+                    System.out.println("Packet Sent");
                 }
                 catch(IOException e){
                     e.printStackTrace();
                 }
-                finally{
-                    socket.close();
-                }
+              
             }
         }
+    }
+    public int getPort(){
+        return port;
+    }
+    public DatagramSocket getSocket(){
+        return socket;
+    }
+    public InetAddress getAddress(){
+        return address;
     }
 }

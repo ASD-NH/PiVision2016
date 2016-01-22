@@ -1,5 +1,6 @@
 import java.util.*;
 import java.lang.*;
+import java.net.Socket;
 import java.io.*;
 
 public class VisionServer{
@@ -15,6 +16,7 @@ public class VisionServer{
         if (args.length == 3 && VisionProcessingThread.checkArgs(args)) {
             
             new VisionServerThread().start();
+            System.out.println("Thread Started");
             
             VisionProcessingThread.m_webcamIndex = Integer.parseInt(args[0]);
             System.out.println("[INIT] Initializing at webcam index " + args[0]);
@@ -31,7 +33,7 @@ public class VisionServer{
         else if (args.length == 2 && VisionProcessingThread.checkArgs(args)) {
             
             new VisionServerThread().start();;
-            
+            System.out.println("Thread Started");
             System.out.println("[INIT] Initializing at default webcam");
             
             VisionProcessingThread.setResolution(args[0]);
@@ -58,11 +60,14 @@ public class VisionServer{
             //start anyway with some default options
             System.out.println("\nLaunching anyway with default camera, medium resolution, and no display");
             new VisionServerThread().start();;
+            System.out.println("Thread Started");
+            
             VisionProcessingThread.setResolution("medium");
             VisionProcessingThread.m_displayDisplay = Boolean.parseBoolean("false");
-            new VisionProcessingThread().start();
+            //new VisionProcessingThread().start();
         }
         
     }
-    
+        
+
 }

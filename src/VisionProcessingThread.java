@@ -44,7 +44,6 @@ public class VisionProcessingThread extends Thread{
         super(name);
         //init webcam
         m_webcam = new CameraInterface(m_webcamIndex, m_camRes);
-        
         //init display
         if(m_displayDisplay) {
             System.out.println("[INFO] Initializing display");
