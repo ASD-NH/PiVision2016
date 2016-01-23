@@ -9,8 +9,10 @@ public class VisionServerThread extends Thread
     public static int port = 00000;
     public static InetAddress address = null;
     DatagramPacket receivePacket;
+    DatagramPacket responsePacket;
     byte[] receivedData = new byte[1024]; 
-
+    byte[] buf = new byte[1024];
+    String decodedData;
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -47,29 +49,31 @@ public class VisionServerThread extends Thread
             return;
         }
         else {
-            byte[] buf = new byte[1024];
+           
             while(running){
                 try{
                     System.out.println("[INFO] Waiting to Receive Packet");
+                    buf = new byte[1024];
                     receivePacket = new DatagramPacket(buf,buf.length);
                     socket.receive(receivePacket);
-                    
-                    System.out.println("Packet Received");
-                    
+                   
                     address = receivePacket.getAddress();
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
                     
-                    if (Arrays.toString(receivedData) == "start"){
-                        String response = "Hello world";
+                    decodedData = new String(receivedData,"UTF-8");
+                    System.out.println("Packet Received from: " + address + " = " + decodedData);
+                    
+                    if (decodedData.equals("start")){
+                        String response = "Received Start";
                         buf = response.getBytes();
                     }
                     else {
-                        String response = "Hello world";
+                        String response = "Case else";
                         buf = response.getBytes();
                     }
                     
-                    DatagramPacket responsePacket = new DatagramPacket(buf,buf.length,address,port);
+                    responsePacket = new DatagramPacket(buf,buf.length,address,port);
                     socket.send(responsePacket);
                     System.out.println("Packet Sent");
                 }
