@@ -14,8 +14,8 @@ public class VisionServer{
         
             new VisionServerThread().start();
             
-            //ParseArguments.parse(args);
-            //new VisionProcessingThread().start();
+            ParseArguments.parse(args);
+            new VisionProcessingThread().start();
         
     }
     

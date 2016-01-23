@@ -31,6 +31,7 @@ public class VisionProcessingThread extends Thread{
 	
 	//image processing related
 	MultiSpectral<ImageFloat32> m_hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
+	ImageUInt8 m_valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
 	
     public VisionProcessingThread(){
         this("VisionProcessingThread");
@@ -64,14 +65,28 @@ public class VisionProcessingThread extends Thread{
     		        ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
     		        m_hsvImage);
     		
+    		ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
     		
+    		for (int i = 0; i < m_valueBand.width; i++) {
+    		    for (int j = 0; j < m_valueBand.height; j++) {
+    		        if (m_valueBand.get(i, j) > 128) {
+    		            m_valueBand.set(i, j, 255);
+    		        }
+    		        else {
+    		            m_valueBand.set(i, j, 0);
+    		        }
+    		    }
+    		}
+    		
+    		m_image.setBand(0, m_valueBand);
+    		m_image.setBand(1, m_valueBand);
+    		m_image.setBand(2, m_valueBand);
     		
     		
     		if (m_showDisplay) {
-    			//Convert the HSV image to RGB temporarily.
-    			ColorHsv.hsvToRgb_F32(m_hsvImage, m_hsvImage);
+    			
     			 //reduce precision to UInt8 for display
-                m_image = ImageConversion.MultiSpectralFloat32ToUInt8(m_hsvImage);
+                //m_image = ImageConversion.MultiSpectralFloat32ToUInt8(m_hsvImage);
                 //debug display update image
     		    m_display.setImageRGB(m_image);
     		}
