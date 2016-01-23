@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.nio.*;
 
 public class VisionServerThread extends Thread
 {
@@ -12,6 +13,7 @@ public class VisionServerThread extends Thread
     DatagramPacket responsePacket;
     byte[] receivedData = new byte[1024]; 
     byte[] buf = new byte[1024];
+    byte[] sendData;
     String decodedData;
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
@@ -38,7 +40,7 @@ public class VisionServerThread extends Thread
             } catch (BindException e) {
                 errorFree = false;
                 currSocket += 1;
-                System.out.println("[WARNING] Socket already in use, trying socket " + currSocket);
+                System.out.println("[WARNING] Socket" +(currSocket-1) +"already in use, trying socket " + currSocket);
             }
         }
         
@@ -64,16 +66,28 @@ public class VisionServerThread extends Thread
                     decodedData = new String(receivedData,"UTF-8");
                     System.out.println("Packet Received from: " + address + " = " + decodedData);
                     
+                    buf = new byte[1024];
+                    
                     if (decodedData.equals("start")){
                         String response = "Received Start";
                         buf = response.getBytes();
                     }
                     else {
-                        String response = "Case else";
-                        buf = response.getBytes();
+                        int[] values = {1,2,3,4,5,6,7,8};
+                        int valueCount=0;
+                        sendData = new byte[values.length*2];
+                        for (int i=0;i<sendData.length;i++){
+                            if (i%2==0){
+                                sendData[i]=(byte)(values[valueCount] & 0xff);
+                            }
+                            else {
+                                sendData[i]=(byte)(values[valueCount] & 0xff00);
+                                valueCount++;
+                            }
+                        }
                     }
                     
-                    responsePacket = new DatagramPacket(buf,buf.length,address,port);
+                    responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
                     socket.send(responsePacket);
                     System.out.println("Packet Sent");
                 }
