@@ -3,7 +3,7 @@ import java.awt.Dimension;
 class ParseArguments {
     
     public static void parse(String[] args) {
-        if (isValid(args)) {
+        if (args.length >= 2 && isValid(args)) {
             if (args.length == 3) {
                 printWebcamInfo(Integer.parseInt(args[0]));
                 VisionProcessingThread.setWebcam(Integer.parseInt(args[0]));

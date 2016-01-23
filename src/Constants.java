@@ -20,6 +20,6 @@ public final class Constants {
             + "Set specific camera:\n"
             + "\tVisionServer.jar (int) CameraIndex (String) Quality (boolean) ShowDisplay\n"
             + "\tQuality Options: minimum, medium, maximum\n\n"
-            + "Launching anyway with the default values (see Constants.java)\n\n";
+            + "Launching anyway with the default values (see Constants.java)\n";
     
 }
