@@ -66,6 +66,8 @@ public class VisionProcessingThread extends Thread{
     		        m_hsvImage);
     		
     		
+    		
+    		
     		if (m_showDisplay) {
     			//Convert the HSV image to RGB temporarily.
     			ColorHsv.hsvToRgb_F32(m_hsvImage, m_hsvImage);
