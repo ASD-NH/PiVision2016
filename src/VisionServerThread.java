@@ -32,7 +32,7 @@ public class VisionServerThread extends Thread
             try {
                 errorFree = true;
                 socket = new DatagramSocket(currSocket);
-                System.out.println("Socket Initilized at: " + currSocket);
+                System.out.println("[INFO] Socket Initialized at: " + currSocket);
             } catch (BindException e) {
                 errorFree = false;
                 currSocket += 1;
@@ -50,7 +50,7 @@ public class VisionServerThread extends Thread
             byte[] buf = new byte[1024];
             while(running){
                 try{
-                    System.out.println("Waiting to Receive Packet");
+                    System.out.println("[INFO] Waiting to Receive Packet");
                     receivePacket = new DatagramPacket(buf,buf.length);
                     socket.receive(receivePacket);
                     
