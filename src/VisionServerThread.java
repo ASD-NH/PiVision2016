@@ -10,7 +10,7 @@ public class VisionServerThread extends Thread
     public static InetAddress address = null;
     DatagramPacket receivePacket;
     byte[] receivedData = new byte[1024]; 
-
+    String decodedData;
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -54,13 +54,15 @@ public class VisionServerThread extends Thread
                     receivePacket = new DatagramPacket(buf,buf.length);
                     socket.receive(receivePacket);
                     
-                    System.out.println("Packet Received");
+                    
                     
                     address = receivePacket.getAddress();
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
+                    decodedData = new String(receivedData,"UTF-8");
+                    System.out.println("Packet Received = " + decodedData);
                     
-                    if (Arrays.toString(receivedData) == "start"){
+                    if (decodedData == "start"){
                         String response = "Hello world";
                         buf = response.getBytes();
                     }
