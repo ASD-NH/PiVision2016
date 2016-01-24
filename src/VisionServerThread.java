@@ -11,8 +11,7 @@ public class VisionServerThread extends Thread
     public static InetAddress address = null;
     DatagramPacket receivePacket;
     DatagramPacket responsePacket;
-    byte[] receivedData = new byte[1024]; 
-    byte[] buf = new byte[1024];
+    byte[] receivedData; 
     byte[] sendData;
     String decodedData;
     //# to start from when sequentially trying sockets (for error catching)
@@ -55,8 +54,8 @@ public class VisionServerThread extends Thread
             while(running){
                 try{
                     System.out.println("[INFO] Waiting to Receive Packet");
-                    buf = new byte[1024];
-                    receivePacket = new DatagramPacket(buf,buf.length);
+                    receivedData= new byte[1024];
+                    receivePacket = new DatagramPacket(receivedData,receivedData.length);
                     socket.receive(receivePacket);
                    
                     address = receivePacket.getAddress();
@@ -64,27 +63,19 @@ public class VisionServerThread extends Thread
                     receivedData = receivePacket.getData();
                     
                     decodedData = new String(receivedData,"UTF-8");
-                    System.out.println("Packet Received from: " + address + " = " + decodedData);
+                    System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
-                    buf = new byte[1024];
+                    sendData = new byte[1024];
                     
                     if (decodedData.equals("start")){
-                        String response = "Received Start";
-                        buf = response.getBytes();
+                        int[] values ={0,0,0,0,0,0,0,0};
+                        sendData=intToByte(values);
                     }
                     else {
                         int[] values = {1,2,3,4,5,6,7,8};
-                        int valueCount=0;
-                        sendData = new byte[values.length*2];
-                        for (int i=0;i<sendData.length;i++){
-                            if (i%2==0){
-                                sendData[i]=(byte)(values[valueCount] & 0xff);
-                            }
-                            else {
-                                sendData[i]=(byte)(values[valueCount] & 0xff00);
-                                valueCount++;
-                            }
-                        }
+                        sendData=intToByte(values);
+                        
+                       
                     }
                     
                     responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
@@ -106,5 +97,20 @@ public class VisionServerThread extends Thread
     }
     public InetAddress getAddress(){
         return address;
+    }
+    public byte[] intToByte(int[] values){
+        int valueCount=0;
+        byte[] bytes = new byte[(values.length*2)];
+        for (int i=0;i < bytes.length;i++){
+            if (i%2==0){
+                bytes[i]=(byte)(values[valueCount] & 0xff);
+            }
+            else {
+                bytes[i]=(byte)(values[valueCount] & 0xff00);
+                valueCount++;
+            }
+        }
+        return bytes;
+        
     }
 }
