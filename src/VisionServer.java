@@ -8,7 +8,7 @@ public class VisionServer{
     
     //Uncomment this out when deploying to the pi (sets the webcam driver to the pi one)
     static {
-        //Webcam.setDriver(new V4l4jDriver());
+        Webcam.setDriver(new V4l4jDriver());
     }
     
     public static void main(String[] args) throws IOException
@@ -16,8 +16,8 @@ public class VisionServer{
         
             new VisionServerThread().start();
             
-            //ParseArguments.parse(args);
-            //new VisionProcessingThread().start();
+            ParseArguments.parse(args);
+            new VisionProcessingThread().start();
         
     }
     

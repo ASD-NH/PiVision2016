@@ -13,18 +13,20 @@ import boofcv.alg.color.ColorHsv;
 import boofcv.core.image.ConvertImage;
 import boofcv.gui.image.*;
 import boofcv.io.image.ConvertBufferedImage;
+import java.net.*;
 
 public class VisionProcessingThread extends Thread{
     
     //camera resolution
-    private static Dimension m_camRes;
-    
+    private static Dimension m_camRes; 
+    int[] values = new int[8];
     //core interface and webcam variables
 	private CameraInterface m_webcam;
 	private static int m_webcamIndex;
 	private MultiSpectral<ImageUInt8> m_image;
 	private boolean m_running = true;
-	
+    Utilities util= new Utilities();
+
 	//debug display object
 	private MultiSpectralDisplay m_display;
 	public static boolean m_showDisplay;
@@ -83,6 +85,29 @@ public class VisionProcessingThread extends Thread{
     		m_image.setBand(2, m_valueBand);
     		
     		
+    		if (VisionServerThread.address != null){
+    		    System.out.println("Creating Packet");
+    		    DatagramPacket dataPacket;
+                byte[] byteData = new byte[1024];
+        		
+        		for (int i =0;i<values.length;i++){
+        		    values[i]=(int)(Math.random()*300);
+        		}
+        		System.out.println(Arrays.toString(values));
+        		byteData = util.intToByte(values);
+        		
+        		 dataPacket = new DatagramPacket(byteData,byteData.length,VisionServerThread.address,VisionServerThread.port);
+        		try {
+        	        System.out.println("trying to send to " + VisionServerThread.address + "on port: " + VisionServerThread.port);
+        		    VisionServerThread.socket.send(dataPacket);
+        		    System.out.println("sent");
+        		    Thread.sleep(5000);
+        		}
+        		catch(Exception e){
+        		    e.printStackTrace();
+        		    System.out.println("send error");
+        		}
+    		}
     		if (m_showDisplay) {
     			
     			 //reduce precision to UInt8 for display
@@ -103,4 +128,5 @@ public class VisionProcessingThread extends Thread{
     public static void setShowDisplay(boolean showDisplay) {
         m_showDisplay = showDisplay;
     }
+    
 }
