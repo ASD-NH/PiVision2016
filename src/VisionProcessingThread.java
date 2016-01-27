@@ -7,10 +7,16 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import boofcv.struct.*;
 import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
 import boofcv.alg.color.ColorHsv;
+import boofcv.alg.feature.detect.edge.CannyEdge;
+import boofcv.alg.filter.binary.BinaryImageOps;
+import boofcv.alg.filter.binary.GThresholdImageOps;
+import boofcv.alg.misc.PixelMath;
 import boofcv.core.image.ConvertImage;
+import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
 import boofcv.gui.image.*;
 import boofcv.io.image.ConvertBufferedImage;
 import java.net.*;
@@ -69,16 +75,13 @@ public class VisionProcessingThread extends Thread{
     		
     		ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
     		
-    		for (int i = 0; i < m_valueBand.width; i++) {
-    		    for (int j = 0; j < m_valueBand.height; j++) {
-    		        if (m_valueBand.get(i, j) > 128) {
-    		            m_valueBand.set(i, j, 255);
-    		        }
-    		        else {
-    		            m_valueBand.set(i, j, 0);
-    		        }
-    		    }
-    		}
+    		GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);    		
+    		
+    		CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
+    		canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
+    		//TODO use this "canny" detector to draw/process the curves
+    		
+    		PixelMath.multiply(m_valueBand, 255, m_valueBand);
     		
     		m_image.setBand(0, m_valueBand);
     		m_image.setBand(1, m_valueBand);
