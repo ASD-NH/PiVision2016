@@ -8,13 +8,13 @@ import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.MultiSpectral;
 
-public class MultiSpectralDisplay {
+public class DebugDisplay {
     
     private ImagePanel m_display;
     Dimension m_resolution;
     private BufferedImage m_image = null;
     
-    MultiSpectralDisplay(Dimension res) {
+    DebugDisplay(Dimension res) {
         
         m_display = new ImagePanel();
         m_resolution = res;

@@ -33,7 +33,7 @@ public class VisionProcessingThread extends Thread{
 	private boolean m_running = true;
 
 	//debug display object
-	private MultiSpectralDisplay m_display;
+	private DebugDisplay m_display;
 	public static boolean m_showDisplay;
 	
 	//image processing related
@@ -56,7 +56,7 @@ public class VisionProcessingThread extends Thread{
             
             //error catching if for example the system is headless
             try {
-                m_display = new MultiSpectralDisplay(m_camRes);
+                m_display = new DebugDisplay(m_camRes);
                 System.out.println("[INFO] Display initializion succeeded");
             } catch (Exception e) {
                 System.out.println("[ERROR] Cannot initialize display, continuing without one...");
