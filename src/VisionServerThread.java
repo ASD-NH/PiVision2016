@@ -5,7 +5,6 @@ import java.nio.*;
 
 public class VisionServerThread extends Thread
 {
-    Utilities util= new Utilities();
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
@@ -70,11 +69,11 @@ public class VisionServerThread extends Thread
                     
                     if (decodedData.equals("start")){
                         int[] values ={0,0,0,0,0,0,0,0};
-                        sendData=util.intToByte(values);
+                        sendData=NetUtils.intToByte(values);
                     }
                     else {
                         int[] values = {1,2,3,4,5,6,7,8};
-                        sendData=util.intToByte(values);
+                        sendData=NetUtils.intToByte(values);
                         
                        
                     }

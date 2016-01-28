@@ -1,7 +1,7 @@
 
-public class Utilities {
+public class NetUtils {
     
-    public byte[] intToByte(int[] values){
+    public static byte[] intToByte(int[] values){
         int valueCount=0;
         byte[] bytes = new byte[(values.length*2)];
         for (int i=0;i < bytes.length;i++){
