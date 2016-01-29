@@ -3,36 +3,15 @@ import java.awt.Dimension;
 class ParseArguments {
     
     public static void parse(String[] args) {
-        if (args.length >= 2 && isValid(args)) {
-            if (args.length == 3) {
-                printWebcamInfo(Integer.parseInt(args[0]));
-                VisionProcessingThread.setWebcam(Integer.parseInt(args[0]));
-                
-                //this function prints its own init info
-                setResolution(args[1]);
-                
-                printDisplayInfo(Boolean.parseBoolean(args[2]));
-                VisionProcessingThread.setShowDisplay(Boolean.parseBoolean(args[2]));
-            }
-            //args.length = 2
-            else {
-                //two arguments means we want to use default webcam
-                printWebcamInfo(Constants.DEFAULT_CAM);
-                VisionProcessingThread.setWebcam(Constants.DEFAULT_CAM);
-                
-                //this function prints its own init info
-                setResolution(args[0]);
-                
-                printDisplayInfo(Boolean.parseBoolean(args[1]));
-                VisionProcessingThread.setShowDisplay(Boolean.parseBoolean(args[1]));
-            }
+        if (args.length == 2 && isValid(args)) {
+            //this function prints its own init info
+            setResolution(args[0]);
+            
+            printDisplayInfo(Boolean.parseBoolean(args[1]));
+            VisionProcessingThread.setShowDisplay(Boolean.parseBoolean(args[1]));
         }
         else {
-            
             System.out.println(Constants.USAGE_MESSAGE);
-            
-            printWebcamInfo(Constants.DEFAULT_CAM);
-            VisionProcessingThread.setWebcam(Constants.DEFAULT_CAM);
             
             printResolutionInfo(Constants.DEFAULT_RES);
             VisionProcessingThread.setResolution(Constants.DEFAULT_RES);
@@ -100,15 +79,6 @@ class ParseArguments {
         return true;
     }
     
-    //init printing where it isn't done already
-    public static void printWebcamInfo(int index) {
-        if (index == 0) {
-            System.out.println("[INIT] Initializing with default webcam");
-        }
-        else {
-            System.out.println("[INIT] Initializing at webcam " + index);
-        }
-    }
     public static void printDisplayInfo(boolean display) {
         if (display) {
             System.out.println("[INIT] Initializing with display");

@@ -20,19 +20,8 @@ public class CameraInterface {
 		//m_webcam.open();
 		System.out.println("[INFO] Camera selected: " + m_webcam.getName());
 		
-		//DEBUG print out supported resolutions
-		m_supportedResolutions = m_webcam.getViewSizes();
-		System.out.println("[INFO] Supported resolutions:");
-		for (int i = 0; i < m_supportedResolutions.length; i++) {
-		    System.out.println("[INFO] " + m_supportedResolutions[i].width + 
-		            "x" + m_supportedResolutions[i].height);
-		}
-		
 		//Change resolution
-		System.out.println("[INFO] Attempting to change resolution to " + 
-		                    resolution.width + "x" + resolution.height);
 		m_webcam.setViewSize(resolution);
-		System.out.println("[INFO] Successfully changed resolution");
 		
 		m_webcam.open();
 	}

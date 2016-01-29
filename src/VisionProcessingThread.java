@@ -27,11 +27,14 @@ public class VisionProcessingThread extends Thread{
     private static Dimension m_camRes; 
     //core interface and webcam variables
 	private CameraInterface m_webcam;
-	private static int m_webcamIndex;
 	private MultiSpectral<ImageUInt8> m_image;
 	
+	//loop as long as this is true
 	private boolean m_running = true;
 
+	//do different things depending on the target
+	Constants.TargetType m_target;
+	
 	//debug display object
 	private DebugDisplay m_display;
 	public static boolean m_showDisplay;
@@ -40,16 +43,18 @@ public class VisionProcessingThread extends Thread{
 	MultiSpectral<ImageFloat32> m_hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
 	ImageUInt8 m_valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
 	
-	//packet sending related
-	int[] m_values = new int[8];
+	//the array to send to the rio
+	int[] m_values;
 	
-    public VisionProcessingThread(){
-        this("VisionProcessingThread");
+    public VisionProcessingThread(int camIndex, Constants.TargetType target){
+        this("VisionProcessingThread", camIndex, target);
     }
-    public VisionProcessingThread(String name){
+    public VisionProcessingThread(String name, int camIndex, Constants.TargetType target){
         super(name);
+        //set target
+        m_target = target;
         //init webcam
-        m_webcam = new CameraInterface(m_webcamIndex, m_camRes);
+        m_webcam = new CameraInterface(camIndex, m_camRes);
         //init display
         if(m_showDisplay) {
             System.out.println("[INFO] Initializing display");
@@ -65,28 +70,38 @@ public class VisionProcessingThread extends Thread{
     }
     
     public void run() {
-        System.out.println("[INFO] Starting main processing loop");
     	while(m_running) {
     		//m_image is the current webcam image
     		m_image = m_webcam.getImage();
     		
-    		//sets m_hsvImage to the hsv version of the source image
-    		ColorHsv.rgbToHsv_F32(
-    		        ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
-    		        m_hsvImage);
-    		
-    		//extracts just the value band from the hsv image
-    		ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
-    		
-    		//threshold the image to make the ball clear
-    		GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);    		
-    		
-    		//edge detect to locate the ball
-    		CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
-    		canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
-    		//TODO use this "canny" detector to draw/process the curves
-    		
-    		
+    		if (m_target == Constants.TargetType.tower) {
+    		    m_values = new int[8];
+    		}
+    		//equals ball
+    		else {
+    		    m_values = new int[8];
+    		    
+    		    //sets m_hsvImage to the hsv version of the source image
+                ColorHsv.rgbToHsv_F32(
+                        ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
+                        m_hsvImage);
+                
+                //extracts just the value band from the hsv image
+                ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
+                
+                //threshold the image to make the ball clear
+                GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);            
+                
+                //edge detect to locate the ball
+                CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
+                canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
+                
+              //update m_image to be used for displaying the result
+                PixelMath.multiply(m_valueBand, 255, m_valueBand);
+                m_image.setBand(0, m_valueBand);
+                m_image.setBand(1, m_valueBand);
+                m_image.setBand(2, m_valueBand);
+    		}
     		
     		//Send data to RIO
     		if (VisionServerThread.address != null){
@@ -115,11 +130,7 @@ public class VisionProcessingThread extends Thread{
         		}
     		}
     		
-    		//update m_image to be used for displaying the result
-            PixelMath.multiply(m_valueBand, 255, m_valueBand);
-            m_image.setBand(0, m_valueBand);
-            m_image.setBand(1, m_valueBand);
-            m_image.setBand(2, m_valueBand);
+    		
     		
     		if (m_showDisplay) {
     			//update the image on the display
@@ -129,9 +140,6 @@ public class VisionProcessingThread extends Thread{
     }
     
     //mutators
-    public static void setWebcam(int index) {
-        m_webcamIndex = index;
-    }
     public static void setResolution(Dimension resolution) {
         m_camRes = resolution;
     }

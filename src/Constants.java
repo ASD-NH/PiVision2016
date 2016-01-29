@@ -2,6 +2,11 @@ import java.awt.Dimension;
 
 public final class Constants {
     
+    enum TargetType {
+        ball,
+        tower
+    }
+    
     //resolution presets
     public static final Dimension MAX_RES = new Dimension(640, 480);
     public static final Dimension MED_RES = new Dimension(320, 240);

@@ -1,6 +1,6 @@
 import java.util.*;
 import com.github.sarxos.webcam.Webcam;
-//import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
+import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
 import java.lang.*;
 import java.io.*;
 
@@ -17,7 +17,8 @@ public class VisionServer{
             new VisionServerThread().start();
             
             ParseArguments.parse(args);
-            new VisionProcessingThread().start();
+            new VisionProcessingThread(0, Constants.TargetType.tower).start();
+            new VisionProcessingThread(1, Constants.TargetType.ball).start();
         
     }
     
