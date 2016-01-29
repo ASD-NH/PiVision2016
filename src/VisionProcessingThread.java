@@ -43,8 +43,6 @@ public class VisionProcessingThread extends Thread{
 	MultiSpectral<ImageFloat32> m_hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
 	ImageUInt8 m_valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
 	
-	//the array to send to the rio
-	int[] m_values;
 	
     public VisionProcessingThread(int camIndex, Constants.TargetType target){
         this("VisionProcessingThread", camIndex, target);
@@ -74,12 +72,15 @@ public class VisionProcessingThread extends Thread{
     		//m_image is the current webcam image
     		m_image = m_webcam.getImage();
     		
+    		//the array to send to the rio
+    		int[] values;
+    		
     		if (m_target == Constants.TargetType.tower) {
-    		    m_values = new int[8];
+    		    values = findTower(m_image);
     		}
     		//equals ball
     		else {
-    		    m_values = new int[8];
+    		    values = findBall(m_image);
     		    
     		    //sets m_hsvImage to the hsv version of the source image
                 ColorHsv.rgbToHsv_F32(
@@ -96,7 +97,7 @@ public class VisionProcessingThread extends Thread{
                 CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
                 canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
                 
-              //update m_image to be used for displaying the result
+                //update m_image to be used for displaying the result
                 PixelMath.multiply(m_valueBand, 255, m_valueBand);
                 m_image.setBand(0, m_valueBand);
                 m_image.setBand(1, m_valueBand);
@@ -110,12 +111,12 @@ public class VisionProcessingThread extends Thread{
     		    DatagramPacket dataPacket;
                 byte[] byteData = new byte[1024];
         		
-        		for (int i =0; i< m_values.length; i++) {
-        		    m_values[i]=(int)(Math.random()*300);
+        		for (int i =0; i< values.length; i++) {
+        		    values[i]=(int)(Math.random()*300);
         		}
         		
-        		System.out.println(Arrays.toString(m_values));
-        		byteData = NetUtils.intToByte(m_values);
+        		System.out.println(Arrays.toString(values));
+        		byteData = NetUtils.intToByte(values);
         		
         		dataPacket = new DatagramPacket(byteData, byteData.length,
         		        VisionServerThread.address,VisionServerThread.port);
@@ -137,6 +138,19 @@ public class VisionProcessingThread extends Thread{
     		    m_display.setImageRGB(m_image);
     		}
     	}
+    }
+    
+    //code to find the tower
+    private int[] findTower(MultiSpectral<ImageUInt8> image) {
+        int[] towerData = new int[9];
+        
+        return towerData;
+    }
+    //code to find the ball
+    private int[] findBall(MultiSpectral<ImageUInt8> image) {
+        int[] ballData = new int[9];
+        
+        return ballData;
     }
     
     //mutators
