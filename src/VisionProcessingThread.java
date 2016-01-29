@@ -40,9 +40,6 @@ public class VisionProcessingThread extends Thread{
 	public static boolean m_showDisplay;
 	
 	//image processing related
-	MultiSpectral<ImageFloat32> m_hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
-	ImageUInt8 m_valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
-	
 	
     public VisionProcessingThread(int camIndex, Constants.TargetType target){
         this("VisionProcessingThread", camIndex, target);
@@ -129,26 +126,29 @@ public class VisionProcessingThread extends Thread{
     private int[] findBall(MultiSpectral<ImageUInt8> image) {
         int[] ballData = new int[9];
         
+        MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
+        ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
+        
         //sets m_hsvImage to the hsv version of the source image
         ColorHsv.rgbToHsv_F32(
                 ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
-                m_hsvImage);
+                hsvImage);
         
         //extracts just the value band from the hsv image
-        ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
+        ConvertImage.convert(hsvImage.getBand(2), valueBand);
         
         //threshold the image to make the ball clear
-        GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);            
+        GThresholdImageOps.localSauvola(hsvImage.getBand(2), valueBand, 20, 0.3f, true);            
         
         //edge detect to locate the ball
         CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
-        canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
+        canny.process(valueBand, 0.1f, 0.3f, valueBand);
         
         //update m_image to be used for displaying the result
-        PixelMath.multiply(m_valueBand, 255, m_valueBand);
-        m_image.setBand(0, m_valueBand);
-        m_image.setBand(1, m_valueBand);
-        m_image.setBand(2, m_valueBand);
+        PixelMath.multiply(valueBand, 255, valueBand);
+        m_image.setBand(0, valueBand);
+        m_image.setBand(1, valueBand);
+        m_image.setBand(2, valueBand);
         
         return ballData;
     }
