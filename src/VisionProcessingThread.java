@@ -14,6 +14,7 @@ import boofcv.alg.color.ColorHsv;
 import boofcv.alg.feature.detect.edge.CannyEdge;
 import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.GThresholdImageOps;
+import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.alg.misc.PixelMath;
 import boofcv.core.image.ConvertImage;
 import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
@@ -73,11 +74,11 @@ public class VisionProcessingThread extends Thread{
     		int[] values;
     		
     		if (m_target == Constants.TargetType.tower) {
-    		    values = findTower(m_image);
+    		    values = findTower();
     		}
     		//equals ball
     		else {
-    		    values = findBall(m_image);
+    		    values = findBall();
     		}
     		
     		//Send data to RIO
@@ -117,13 +118,25 @@ public class VisionProcessingThread extends Thread{
     }
     
     //code to find the tower
-    private int[] findTower(MultiSpectral<ImageUInt8> image) {
+    private int[] findTower() {
         int[] towerData = new int[9];
+        
+        ImageUInt8 filtered = new ImageUInt8(m_camRes.width, m_camRes.height);
+        ThresholdImageOps.threshold(m_image.getBand(0), filtered, 160, true);
+        
+        CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2, true, true, ImageUInt8.class, ImageSInt16.class);
+        canny.process(filtered, 0.1f, 0.3f, filtered);
+        
+        PixelMath.multiply(filtered, 255, filtered);
+        
+        m_image.setBand(0, filtered);
+        m_image.setBand(1, filtered);
+        m_image.setBand(2, filtered);
         
         return towerData;
     }
     //code to find the ball
-    private int[] findBall(MultiSpectral<ImageUInt8> image) {
+    private int[] findBall() {
         int[] ballData = new int[9];
         
         MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
