@@ -81,27 +81,6 @@ public class VisionProcessingThread extends Thread{
     		//equals ball
     		else {
     		    values = findBall(m_image);
-    		    
-    		    //sets m_hsvImage to the hsv version of the source image
-                ColorHsv.rgbToHsv_F32(
-                        ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
-                        m_hsvImage);
-                
-                //extracts just the value band from the hsv image
-                ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
-                
-                //threshold the image to make the ball clear
-                GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);            
-                
-                //edge detect to locate the ball
-                CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
-                canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
-                
-                //update m_image to be used for displaying the result
-                PixelMath.multiply(m_valueBand, 255, m_valueBand);
-                m_image.setBand(0, m_valueBand);
-                m_image.setBand(1, m_valueBand);
-                m_image.setBand(2, m_valueBand);
     		}
     		
     		//Send data to RIO
@@ -149,6 +128,27 @@ public class VisionProcessingThread extends Thread{
     //code to find the ball
     private int[] findBall(MultiSpectral<ImageUInt8> image) {
         int[] ballData = new int[9];
+        
+        //sets m_hsvImage to the hsv version of the source image
+        ColorHsv.rgbToHsv_F32(
+                ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
+                m_hsvImage);
+        
+        //extracts just the value band from the hsv image
+        ConvertImage.convert(m_hsvImage.getBand(2), m_valueBand);
+        
+        //threshold the image to make the ball clear
+        GThresholdImageOps.localSauvola(m_hsvImage.getBand(2), m_valueBand, 20, 0.3f, true);            
+        
+        //edge detect to locate the ball
+        CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
+        canny.process(m_valueBand, 0.1f, 0.3f, m_valueBand);
+        
+        //update m_image to be used for displaying the result
+        PixelMath.multiply(m_valueBand, 255, m_valueBand);
+        m_image.setBand(0, m_valueBand);
+        m_image.setBand(1, m_valueBand);
+        m_image.setBand(2, m_valueBand);
         
         return ballData;
     }
