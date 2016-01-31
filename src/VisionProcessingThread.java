@@ -280,6 +280,12 @@ public class VisionProcessingThread extends Thread{
 	        towerData[7] = centralTarget.m_bounds.get(2).x;
 	        towerData[8] = centralTarget.m_bounds.get(2).y;
         }
+        else {
+        	towerData[0] = 0;
+        	for(int i = 1; i < towerData.length; i++){
+        		towerData[i] = -1;
+        	}
+        }
         
         return towerData;
     }
