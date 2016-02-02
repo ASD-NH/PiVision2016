@@ -226,6 +226,32 @@ public class VisionProcessingThread extends Thread{
     	return result;
     }
     
+    private double largestAngle(List<PointIndex_I32> vertexes){
+    	double largest = 0;
+    	
+    	for(int i = 1; i < vertexes.size(); i++){
+    		PointIndex_I32 last = vertexes.get(i - 1);
+    		PointIndex_I32 current = vertexes.get(i);
+    		PointIndex_I32 next;
+    		if(i < vertexes.size() - 1){
+    			next = vertexes.get(i + 1);
+    		}
+    		else {
+    			next = vertexes.get(0);
+    		}
+
+    		double sideA = last.distance(current);
+    		double sideB = current.distance(next);
+    		double sideC = last.distance(next);
+    		
+    		double angle = Math.acos((Math.pow(sideA, 2) + Math.pow(sideB, 2) - Math.pow(sideC, 2)) / (2 * sideA * sideB));
+    		
+    		largest = Math.max(largest, angle);
+    	}
+    	
+    	return largest;
+    }
+    
     //code to find the tower
     private int[] findTower() {
         int[] towerData = new int[9];
@@ -259,9 +285,11 @@ public class VisionProcessingThread extends Thread{
         	}
         	
         	double length = findLargestSegment(vertexes, null);
+        	double largeAngle = largestAngle(bounds);
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
-        			&& ratio > 0.4 && ratio < 1){
+        			&& ratio > 0.4 && ratio < 1
+        			&& largeAngle > 1.5 && largeAngle < 1.8){
 	        	targets.add(new foundTarget(vertexes, boundsBox, bounds));
         	}
         }
