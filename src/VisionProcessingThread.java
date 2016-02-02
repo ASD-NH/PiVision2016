@@ -47,8 +47,8 @@ class foundTarget {
 	
 	public PointIndex_I32 getCenter(){
 		
-		int centerX = (m_bounds.get(0).x + m_bounds.get(1).x) / 2;
-		int centerY = (m_bounds.get(0).y + m_bounds.get(3).y) / 2;
+		int centerX = (m_bounds.get(0).x + m_bounds.get(2).x) / 2;
+		int centerY = (m_bounds.get(1).y + m_bounds.get(3).y) / 2;
 		
 		return new PointIndex_I32(centerX, centerY, 0);
 	}
@@ -182,14 +182,45 @@ public class VisionProcessingThread extends Thread{
     		maxY = Math.max(p.y, maxY);
     	}
     	
-    	result.add(new PointIndex_I32(minX, minY, 0));
-    	result.add(new PointIndex_I32(maxX, minY, 1));
-    	result.add(new PointIndex_I32(maxX, maxY, 2));
-    	result.add(new PointIndex_I32(minX, maxY, 3));
+    	int width = maxX - minX;
+    	int height = maxY - minY;
+    	
+    	PointIndex_I32 center = new PointIndex_I32(minX + (width / 2), minY + (height / 2), 0);
+    	
+    	for(int i = 0; i < 4; i++){
+    		result.add(new PointIndex_I32(center.x, center.y, i));
+    	}
+    	
+    	for(PointIndex_I32 p : vertexes){
+    		if(p.x < center.x){
+    			if(p.y < center.y){
+    				if(center.distance(p) > center.distance(result.get(0))){
+    					result.set(0, p);
+    				}
+    			}
+    			else {
+    				if(center.distance(p) > center.distance(result.get(3))){
+    					result.set(3, p);
+    				}
+    			}
+    		}
+    		else {
+    			if(p.y < center.y){
+    				if(center.distance(p) > center.distance(result.get(1))){
+    					result.set(1, p);
+    				}
+    			}
+    			else {
+    				if(center.distance(p) > center.distance(result.get(2))){
+    					result.set(2, p);
+    				}
+    			}
+    		}
+    	}
     	
     	if(dimension != null){
-    		dimension.width = maxX - minX;
-    		dimension.height = maxY - minY;
+    		dimension.width = result.get(0).distance2(result.get(1));
+    		dimension.height = result.get(1).distance2(result.get(2));
     	}
     	
     	return result;
@@ -223,11 +254,14 @@ public class VisionProcessingThread extends Thread{
         			boundsBox);
         	
         	double ratio = boundsBox.getHeight() / boundsBox.getWidth();
+        	if(ratio > 1){
+        		ratio = 1 / ratio;
+        	}
         	
         	double length = findLargestSegment(vertexes, null);
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
-        			&& ratio > 0.6 && ratio < 0.9){
+        			&& ratio > 0.4 && ratio < 1){
 	        	targets.add(new foundTarget(vertexes, boundsBox, bounds));
         	}
         }
