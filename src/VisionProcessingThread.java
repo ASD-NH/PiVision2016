@@ -314,7 +314,7 @@ public class VisionProcessingThread extends Thread{
         if(centralTarget != null){
 	        g.setColor(Color.GREEN);
 	    	VisualizeShapes.drawPolygon(centralTarget.m_bounds, true, g);
-	    	g.drawOval(centralTarget.getCenter().x, centralTarget.getCenter().y, 5, 5);
+	    	g.drawOval((int)(centralTarget.getCenter().x - 2.5), (int)(centralTarget.getCenter().y - 2.5), 5, 5);
         }
         
         m_image = ImageConversion.toMultiSpectral(gImage);
