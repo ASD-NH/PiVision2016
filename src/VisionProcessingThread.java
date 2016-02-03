@@ -151,7 +151,7 @@ public class VisionProcessingThread extends Thread{
         ConvertImage.convert(hsvImage.getBand(2), valueBand);
         
         //threshold the image to make the ball clear
-        GThresholdImageOps.localSauvola(hsvImage.getBand(2), valueBand, 20, 0.3f, true);            
+        valueBand = ThresholdImageOps.localSquare(valueBand, null, 20, 0.98f, true, null, null);
         
         //edge detect to locate the ball
         CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
