@@ -144,11 +144,11 @@ public class VisionProcessingThread extends Thread{
         g.setStroke(new BasicStroke(2));
         
         ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
-        List<Target> targets = new ArrayList<Target>();
+        List<TowerTarget> targets = new ArrayList<TowerTarget>();
         
         for(Contour c : contours){
         	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
-        	Target possibleTarget = new Target(vertexes, m_camRes);
+        	TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
         	
         	double ratio = possibleTarget.m_boundsBox.getHeight() / possibleTarget.m_boundsBox.getWidth();
         	
@@ -163,10 +163,10 @@ public class VisionProcessingThread extends Thread{
         	}
         }
         
-        Target centralTarget = null;
+        TowerTarget centralTarget = null;
         PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
         
-        for(Target t : targets){
+        for(TowerTarget t : targets){
         	if(centralTarget == null){
         		centralTarget = t;
         	}
@@ -251,28 +251,34 @@ public class VisionProcessingThread extends Thread{
         
         List<Contour> contours = BinaryImageOps.contour(valueBand, ConnectRule.EIGHT, null);
         
-        List<EllipseRotated_F64> validEllipses = new ArrayList<EllipseRotated_F64>();
+        List<BallTarget> validEllipses = new ArrayList<BallTarget>();
         
         for(Contour c : contours){
-        	FitData<EllipseRotated_F64> circle = ShapeFittingOps.fitEllipse_I32(c.external, 0, false, null);
+        	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.5, 0.5, 2);
         	
-        	double ratio = circle.shape.a / circle.shape.b;
+        	BallTarget circle = new BallTarget(vertexes, m_camRes);
+        	
+        	double largestAngle = circle.largestAngle();
+        		
+        	double ratio = circle.m_shape.a / circle.m_shape.b;
         	if(ratio < 1){
         		ratio = 1 / ratio;
         	}
         	
-        	double averageRadius = (circle.shape.a + circle.shape.b) / 2;
+        	double averageRadius = (circle.m_shape.a + circle.m_shape.b) / 2;
         	
-        	if(ratio < 1.08 && circle.error < 0.1 && averageRadius > 20){
-        		validEllipses.add(circle.shape);
+        	if(ratio < 1.08 && averageRadius > 20
+        			&& largestAngle > Math.PI){
+        		validEllipses.add(circle);
         	}
         }
         
-        EllipseRotated_F64 ball = TargetingUtils.largestArea(validEllipses);
+        BallTarget ball = TargetingUtils.largestArea(validEllipses);
         if(ball != null){
+        	System.out.println("found at least something");
 	        g.setColor(Color.CYAN);
-	        double averageRadius = (ball.a + ball.b) / 2;
-	        g.drawOval((int)(ball.center.x - averageRadius), (int)(ball.center.y - averageRadius), (int)averageRadius * 2, (int)averageRadius * 2);
+	        double averageRadius = (ball.m_shape.a + ball.m_shape.b) / 2;
+	        g.drawOval((int)(ball.getCenter().x - averageRadius), (int)(ball.getCenter().y - averageRadius), (int)averageRadius * 2, (int)averageRadius * 2);
         }
         
         m_image = ImageConversion.toMultiSpectral(gImage);
