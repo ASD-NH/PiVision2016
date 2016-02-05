@@ -10,10 +10,10 @@ public class Target {
     public List<PointIndex_I32> m_bounds;
     public List<PointIndex_I32> m_largestSegment;
     
-    public Target(List<PointIndex_I32> rawVertexes, Dimension boundsBox, List<PointIndex_I32> bounds){
+    public Target(List<PointIndex_I32> rawVertexes, Dimension cameraRes){
         m_rawVertexes = rawVertexes;
-        m_boundsBox = boundsBox;
-        m_bounds = bounds;
+        m_boundsBox = new Dimension();
+        m_bounds = findBounds(cameraRes);
     }
     
     public Target(){
@@ -28,6 +28,10 @@ public class Target {
         int centerY = (m_bounds.get(1).y + m_bounds.get(3).y) / 2;
         
         return new PointIndex_I32(centerX, centerY, 0);
+    }
+    
+    public List<PointIndex_I32> findBounds(Dimension maxSize){
+    	return findBounds(maxSize.height, maxSize.width);
     }
     
     public List<PointIndex_I32> findBounds(int maxHeight, int maxWidth){

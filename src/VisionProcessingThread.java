@@ -148,25 +148,18 @@ public class VisionProcessingThread extends Thread{
         
         for(Contour c : contours){
         	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
-        	Dimension boundsBox = new Dimension();
-        	List<PointIndex_I32> bounds = findBounds(
-        			vertexes,
-        			m_camRes.height,
-        			m_camRes.width,
-        			boundsBox);
+        	Target possibleTarget = new Target(vertexes, m_camRes);
         	
-        	double ratio = boundsBox.getHeight() / boundsBox.getWidth();
-        	if(ratio > 1){
-        		ratio = 1 / ratio;
-        	}
+        	double ratio = possibleTarget.m_boundsBox.getHeight() / possibleTarget.m_boundsBox.getWidth();
         	
-        	double length = findLargestSegment(vertexes, null);
-        	double largeAngle = TargetingUtils.largestAngle(bounds);
+        	ratio = ratio > 1 ? 1 / ratio : ratio;
+        	
+        	double largeAngle = possibleTarget.largestAngle();
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
         			&& ratio > 0.4 && ratio < 1
         			&& largeAngle > 1.5 && largeAngle < 1.8){
-	        	targets.add(new Target(vertexes, boundsBox, bounds));
+	        	targets.add(possibleTarget);
         	}
         }
         
