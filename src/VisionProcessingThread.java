@@ -31,32 +31,6 @@ import boofcv.gui.image.*;
 import boofcv.io.image.ConvertBufferedImage;
 import java.net.*;
 
-class foundTarget {
-	public List<PointIndex_I32> m_rawVertexes;
-	public Dimension m_boundsBox;
-	public List<PointIndex_I32> m_bounds;
-	
-	public foundTarget(List<PointIndex_I32> rawVertexes, Dimension boundsBox, List<PointIndex_I32> bounds){
-		m_rawVertexes = rawVertexes;
-		m_boundsBox = boundsBox;
-		m_bounds = bounds;
-	}
-	
-	public foundTarget(){
-		m_rawVertexes = new ArrayList<PointIndex_I32>();
-		m_boundsBox = new Dimension();
-		m_bounds = new ArrayList<PointIndex_I32>();
-	}
-	
-	public PointIndex_I32 getCenter(){
-		
-		int centerX = (m_bounds.get(0).x + m_bounds.get(2).x) / 2;
-		int centerY = (m_bounds.get(1).y + m_bounds.get(3).y) / 2;
-		
-		return new PointIndex_I32(centerX, centerY, 0);
-	}
-}
-
 public class VisionProcessingThread extends Thread{
     
     //camera resolution
@@ -152,108 +126,7 @@ public class VisionProcessingThread extends Thread{
     	}
     }
     
-    private double findLargestSegment(List<PointIndex_I32> vertexes, List<PointIndex_I32> segment){
-    	double longestLength = 0;
-    	
-    	for(int i = 0; i < vertexes.size() - 1; i++){
-    		double length = vertexes.get(i).distance(vertexes.get(i + 1));
-    		if(length > longestLength){
-    			longestLength = length;
-    			if(segment != null){
-	    			segment.clear();
-	    			segment.add(vertexes.get(i));
-	    			segment.add(vertexes.get(i + 1));
-    			}
-    		}
-    	}
-    	
-    	return longestLength;
-    }
     
-    private List<PointIndex_I32> findBounds(List<PointIndex_I32> vertexes, int maxHeight, int maxWidth, Dimension dimension){
-    	List<PointIndex_I32> result = new ArrayList<PointIndex_I32>();
-    	
-    	int minX = maxWidth;
-    	int minY = maxHeight;
-    	int maxX = 0;
-    	int maxY = 0;
-    	
-    	for(PointIndex_I32 p : vertexes){
-    		minX = Math.min(p.x, minX);
-    		minY = Math.min(p.y, minY);
-    		maxX = Math.max(p.x, maxX);
-    		maxY = Math.max(p.y, maxY);
-    	}
-    	
-    	int width = maxX - minX;
-    	int height = maxY - minY;
-    	
-    	PointIndex_I32 center = new PointIndex_I32(minX + (width / 2), minY + (height / 2), 0);
-    	
-    	for(int i = 0; i < 4; i++){
-    		result.add(new PointIndex_I32(center.x, center.y, i));
-    	}
-    	
-    	for(PointIndex_I32 p : vertexes){
-    		if(p.x < center.x){
-    			if(p.y < center.y){
-    				if(center.distance(p) > center.distance(result.get(0))){
-    					result.set(0, p);
-    				}
-    			}
-    			else {
-    				if(center.distance(p) > center.distance(result.get(3))){
-    					result.set(3, p);
-    				}
-    			}
-    		}
-    		else {
-    			if(p.y < center.y){
-    				if(center.distance(p) > center.distance(result.get(1))){
-    					result.set(1, p);
-    				}
-    			}
-    			else {
-    				if(center.distance(p) > center.distance(result.get(2))){
-    					result.set(2, p);
-    				}
-    			}
-    		}
-    	}
-    	
-    	if(dimension != null){
-    		dimension.width = result.get(0).distance2(result.get(1));
-    		dimension.height = result.get(1).distance2(result.get(2));
-    	}
-    	
-    	return result;
-    }
-    
-    private double largestAngle(List<PointIndex_I32> vertexes){
-    	double largest = 0;
-    	
-    	for(int i = 1; i < vertexes.size(); i++){
-    		PointIndex_I32 last = vertexes.get(i - 1);
-    		PointIndex_I32 current = vertexes.get(i);
-    		PointIndex_I32 next;
-    		if(i < vertexes.size() - 1){
-    			next = vertexes.get(i + 1);
-    		}
-    		else {
-    			next = vertexes.get(0);
-    		}
-
-    		double sideA = last.distance(current);
-    		double sideB = current.distance(next);
-    		double sideC = last.distance(next);
-    		
-    		double angle = Math.acos((Math.pow(sideA, 2) + Math.pow(sideB, 2) - Math.pow(sideC, 2)) / (2 * sideA * sideB));
-    		
-    		largest = Math.max(largest, angle);
-    	}
-    	
-    	return largest;
-    }
     
     //code to find the tower
     private int[] findTower() {
@@ -271,7 +144,7 @@ public class VisionProcessingThread extends Thread{
         g.setStroke(new BasicStroke(2));
         
         ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
-        List<foundTarget> targets = new ArrayList<foundTarget>();
+        List<Target> targets = new ArrayList<Target>();
         
         for(Contour c : contours){
         	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
@@ -288,19 +161,19 @@ public class VisionProcessingThread extends Thread{
         	}
         	
         	double length = findLargestSegment(vertexes, null);
-        	double largeAngle = largestAngle(bounds);
+        	double largeAngle = TargetingUtils.largestAngle(bounds);
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
         			&& ratio > 0.4 && ratio < 1
         			&& largeAngle > 1.5 && largeAngle < 1.8){
-	        	targets.add(new foundTarget(vertexes, boundsBox, bounds));
+	        	targets.add(new Target(vertexes, boundsBox, bounds));
         	}
         }
         
-        foundTarget centralTarget = null;
+        Target centralTarget = null;
         PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
         
-        for(foundTarget t : targets){
+        for(Target t : targets){
         	if(centralTarget == null){
         		centralTarget = t;
         	}
@@ -354,28 +227,8 @@ public class VisionProcessingThread extends Thread{
         
         return towerData;
     }
+    
     //code to find the ball
-    
-    private EllipseRotated_F64 largestArea(List<EllipseRotated_F64> ellipses){
-    	EllipseRotated_F64 largest = null;
-    	
-    	for(EllipseRotated_F64 e : ellipses){
-    		if(largest == null){
-    			largest = e;
-    		}
-    		else {
-    			double largeArea = Math.PI * largest.a * largest.b;
-    			double newArea = Math.PI * e.a * e.b;
-    			
-    			if(newArea > largeArea){
-    				largest = e;
-    			}
-    		}
-    	}
-    	
-    	return largest;
-    }
-    
     private int[] findBall() {
         int[] ballData = new int[9];
         
@@ -422,7 +275,7 @@ public class VisionProcessingThread extends Thread{
         	}
         }
         
-        EllipseRotated_F64 ball = largestArea(validEllipses);
+        EllipseRotated_F64 ball = TargetingUtils.largestArea(validEllipses);
         if(ball != null){
 	        g.setColor(Color.CYAN);
 	        double averageRadius = (ball.a + ball.b) / 2;
