@@ -201,7 +201,7 @@ public class VisionProcessingThread extends Thread{
          *  -bottom right y
          */
         if(centralTarget != null){
-	        towerData[0] = 0;
+	        towerData[0] = Constants.TOWER_FLAG;
 	        towerData[1] = centralTarget.m_bounds.get(0).x;
 	        towerData[2] = centralTarget.m_bounds.get(0).y;
 	        towerData[3] = centralTarget.m_bounds.get(1).x;

@@ -27,4 +27,9 @@ public final class Constants {
             + "\tQuality Options: minimum, medium, maximum\n\n"
             + "Launching anyway with the default values (see Constants.java)\n";
     
+    //Data flags: Element 0 in sent data arrays; indicate whether received data
+    //pertains to tower (1) or ball (2)
+    public static final int TOWER_FLAG = 1;
+    public static final int BALL_FLAG = 2;
+    
 }
