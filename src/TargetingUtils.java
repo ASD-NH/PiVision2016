@@ -4,16 +4,16 @@ import boofcv.struct.PointIndex_I32;
 import georegression.struct.shapes.EllipseRotated_F64;
 
 public class TargetingUtils {
-    public static EllipseRotated_F64 largestArea(List<EllipseRotated_F64> ellipses){
-        EllipseRotated_F64 largest = null;
+    public static BallTarget largestArea(List<BallTarget> targets){
+        BallTarget largest = null;
         
-        for(EllipseRotated_F64 e : ellipses){
+        for(BallTarget e : targets){
             if(largest == null){
                 largest = e;
             }
             else {
-                double largeArea = Math.PI * largest.a * largest.b;
-                double newArea = Math.PI * e.a * e.b;
+                double largeArea = Math.PI * largest.m_shape.a * largest.m_shape.b;
+                double newArea = Math.PI * e.m_shape.a * e.m_shape.b;
                 
                 if(newArea > largeArea){
                     largest = e;
