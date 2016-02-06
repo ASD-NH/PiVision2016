@@ -98,11 +98,6 @@ public class VisionProcessingThread extends Thread{
     		    DatagramPacket dataPacket;
                 byte[] byteData = new byte[1024];
         		
-        		for (int i =0; i< values.length; i++) {
-        		    values[i]=(int)(Math.random()*300);
-        		}
-        		
-        		System.out.println(Arrays.toString(values));
         		byteData = NetUtils.intToByte(values);
         		
         		dataPacket = new DatagramPacket(byteData, byteData.length,
@@ -111,7 +106,6 @@ public class VisionProcessingThread extends Thread{
         	        System.out.println("[INFO] Attempting to send to " + VisionServerThread.address + " on port: " + VisionServerThread.port);
         		    VisionServerThread.socket.send(dataPacket);
         		    System.out.println("[INFO] Success");
-        		    Thread.sleep(5000);
         		}
         		catch(Exception e){
         		    System.out.println("[ERROR] Send failed");
