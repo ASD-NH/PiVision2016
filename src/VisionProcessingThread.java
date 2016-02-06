@@ -50,6 +50,8 @@ public class VisionProcessingThread extends Thread{
 	private DebugDisplay m_display;
 	public static boolean m_showDisplay;
 	
+	private boolean ballHistory[];
+	
 	//image processing related
 	
     public VisionProcessingThread(int camIndex, Constants.TargetType target){
@@ -62,6 +64,7 @@ public class VisionProcessingThread extends Thread{
         //init webcam
         m_webcam = new CameraInterface(camIndex, m_camRes);
         //init display
+        ballHistory = new boolean[Constants.HISTORY_SIZE];
         if(m_showDisplay) {
             System.out.println("[INFO] Initializing display");
             
@@ -285,7 +288,21 @@ public class VisionProcessingThread extends Thread{
 	        
 	        m_image = ImageConversion.toMultiSpectral(gImage);
         }
-        if(ball != null){
+        
+        for (int i = ballHistory.length - 2; i >= 0; i--) {
+        	ballHistory[i + 1] = ballHistory[i];
+        }
+    	//if we've found anything at all this frame, then set this to true, otherwise it's false
+    	ballHistory[0] = ball != null ? true : false;
+    	
+        boolean trueTarget = true;
+        for(boolean b : ballHistory){
+        	if(!b){
+        		trueTarget = false;
+        	}
+        }
+        
+        if(trueTarget){
         	ballData[0] = Constants.BALL_FLAG;
         	ballData[1] = (int)Math.round(ball.getAverageRadius());
         	ballData[2] = ball.getCenter().x;
@@ -297,6 +314,8 @@ public class VisionProcessingThread extends Thread{
         		ballData[i] = 0;
         	}
         }
+        
+        System.out.println(Arrays.toString(ballData));
         
         return ballData;
     }
