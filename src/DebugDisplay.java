@@ -92,4 +92,8 @@ public class DebugDisplay {
         m_color = color;
     }
     
+    void clearBuffer(){
+    	m_polyPoints = null;
+    	m_ellipse = null;
+    }
 }

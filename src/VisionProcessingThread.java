@@ -13,6 +13,7 @@ import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_F32;
+import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.EllipseRotated_F64;
 import boofcv.alg.color.ColorHsv;
 import boofcv.alg.feature.detect.edge.CannyEdge;
@@ -254,7 +255,7 @@ public class VisionProcessingThread extends Thread{
         List<BallTarget> validEllipses = new ArrayList<BallTarget>();
         
         for(Contour c : contours){
-        	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.5, 0.5, 2);
+        	List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.05, 0, 100);
         	
         	BallTarget circle = new BallTarget(vertexes, m_camRes);
         	
@@ -266,22 +267,24 @@ public class VisionProcessingThread extends Thread{
         	}
         	
         	double averageRadius = (circle.m_shape.a + circle.m_shape.b) / 2;
-        	
-        	if(ratio < 1.08 && averageRadius > 20
-        			&& largestAngle > Math.PI){
+    		
+        	if(ratio < 1.3 && averageRadius > 30
+        			&& largestAngle > 2.5 && largestAngle < 3.2){
         		validEllipses.add(circle);
         	}
         }
         
+        m_display.clearBuffer();
+        
         BallTarget ball = TargetingUtils.largestArea(validEllipses);
         if(ball != null){
-        	System.out.println("found at least something");
-	        g.setColor(Color.CYAN);
-	        double averageRadius = (ball.m_shape.a + ball.m_shape.b) / 2;
-	        g.drawOval((int)(ball.getCenter().x - averageRadius), (int)(ball.getCenter().y - averageRadius), (int)averageRadius * 2, (int)averageRadius * 2);
+	        m_display.setColor(Color.CYAN);
+	        m_display.setEllipse(ball.m_shape);
         }
         
         m_image = ImageConversion.toMultiSpectral(gImage);
+        
+        
         
         return ballData;
     }
