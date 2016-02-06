@@ -213,7 +213,7 @@ public class VisionProcessingThread extends Thread{
 	        towerData[8] = centralTarget.m_bounds.get(2).y;
         }
         else {
-        	towerData[0] = 0;
+        	towerData[0] = Constants.TOWER_FLAG;
         	for(int i = 1; i < towerData.length; i++){
         		towerData[i] = -1;
         	}
@@ -224,7 +224,7 @@ public class VisionProcessingThread extends Thread{
     
     //code to find the ball
     private int[] findBall() {
-        int[] ballData = new int[9];
+        int[] ballData = new int[4];
         
         MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
         ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
@@ -284,7 +284,18 @@ public class VisionProcessingThread extends Thread{
         
         m_image = ImageConversion.toMultiSpectral(gImage);
         
-        
+        if(ball != null){
+        	ballData[0] = Constants.BALL_FLAG;
+        	ballData[1] = (int)Math.round(ball.getAverageRadius());
+        	ballData[2] = ball.getCenter().x;
+        	ballData[3] = ball.getCenter().y;
+        }
+        else {
+        	ballData[0] = Constants.BALL_FLAG;
+        	for(int i = 1; i < ballData.length; i++){
+        		ballData[i] = -1;
+        	}
+        }
         
         return ballData;
     }
