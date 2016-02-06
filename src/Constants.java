@@ -32,4 +32,6 @@ public final class Constants {
     public static final int TOWER_FLAG = 1;
     public static final int BALL_FLAG = 2;
     
+    //This is the number of frames that have to get a positive match before a target will show up as detected
+    public static final int HISTORY_SIZE = 5;
 }
