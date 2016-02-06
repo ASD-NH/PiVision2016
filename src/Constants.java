@@ -31,5 +31,6 @@ public final class Constants {
     //pertains to tower (1) or ball (2)
     public static final int TOWER_FLAG = 1;
     public static final int BALL_FLAG = 2;
+    public static final int NULL_FLAG=0;
     
 }

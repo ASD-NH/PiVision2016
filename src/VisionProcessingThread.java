@@ -90,6 +90,7 @@ public class VisionProcessingThread extends Thread{
     		else {
     		    values = findBall();
     		}
+    		System.out.println("values presend" + Arrays.toString(values));
     		
     		//Send data to RIO
     		if (VisionServerThread.address != null){
@@ -110,6 +111,7 @@ public class VisionProcessingThread extends Thread{
         		catch(Exception e){
         		    System.out.println("[ERROR] Send failed");
         		}
+        		System.out.println("values post send" + Arrays.toString(values));
     		}
     		
     		
@@ -207,9 +209,9 @@ public class VisionProcessingThread extends Thread{
 	        towerData[8] = centralTarget.m_bounds.get(2).y;
         }
         else {
-        	towerData[0] = Constants.TOWER_FLAG;
+        	towerData[0] = Constants.NULL_FLAG;
         	for(int i = 1; i < towerData.length; i++){
-        		towerData[i] = -1;
+        		towerData[i] = 0;
         	}
         }
         
@@ -290,9 +292,9 @@ public class VisionProcessingThread extends Thread{
         	ballData[3] = ball.getCenter().y;
         }
         else {
-        	ballData[0] = Constants.BALL_FLAG;
+        	ballData[0] = Constants.NULL_FLAG;
         	for(int i = 1; i < ballData.length; i++){
-        		ballData[i] = -1;
+        		ballData[i] = 0;
         	}
         }
         
