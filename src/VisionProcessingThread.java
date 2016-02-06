@@ -181,7 +181,7 @@ public class VisionProcessingThread extends Thread{
         	}
         }
         
-        if(centralTarget != null){
+        if(centralTarget != null && m_showDisplay){
 	        g.setColor(Color.GREEN);
 	    	VisualizeShapes.drawPolygon(centralTarget.m_bounds, true, g);
 	    	g.drawOval((int)(centralTarget.getCenter().x - 2.5), (int)(centralTarget.getCenter().y - 2.5), 5, 5);
@@ -244,11 +244,14 @@ public class VisionProcessingThread extends Thread{
         //edge detect to locate the ball
         CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
         canny.process(valueBand, 0.1f, 0.3f, valueBand);
-        BufferedImage gImage = new BufferedImage(valueBand.width, valueBand.height, 4);
-        Graphics2D g = gImage.createGraphics();
-        g.setStroke(new BasicStroke(2));
+        BufferedImage gImage = null;
+        if(m_showDisplay){
+	        gImage = new BufferedImage(valueBand.width, valueBand.height, 4);
+	        Graphics2D g = gImage.createGraphics();
+	        g.setStroke(new BasicStroke(2));
         
-        ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
+	        ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
+        }
         
         List<Contour> contours = BinaryImageOps.contour(valueBand, ConnectRule.EIGHT, null);
         
@@ -274,16 +277,18 @@ public class VisionProcessingThread extends Thread{
         	}
         }
         
-        m_display.clearBuffer();
-        
         BallTarget ball = TargetingUtils.largestArea(validEllipses);
-        if(ball != null){
-	        m_display.setColor(Color.CYAN);
-	        m_display.setEllipse(ball.m_shape);
+        
+        if(m_showDisplay){
+	        m_display.clearBuffer();
+	        
+	        if(ball != null){
+		        m_display.setColor(Color.CYAN);
+		        m_display.setEllipse(ball.m_shape);
+	        }
+	        
+	        m_image = ImageConversion.toMultiSpectral(gImage);
         }
-        
-        m_image = ImageConversion.toMultiSpectral(gImage);
-        
         if(ball != null){
         	ballData[0] = Constants.BALL_FLAG;
         	ballData[1] = (int)Math.round(ball.getAverageRadius());
