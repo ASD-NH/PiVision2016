@@ -93,6 +93,7 @@ public class VisionProcessingThread extends Thread{
     		else {
     		    values = findBall();
     		}
+    		System.out.println("values presend" + Arrays.toString(values));
     		
     		//Send data to RIO
     		if (VisionServerThread.address != null){
@@ -113,6 +114,7 @@ public class VisionProcessingThread extends Thread{
         		catch(Exception e){
         		    System.out.println("[ERROR] Send failed");
         		}
+        		System.out.println("values post send" + Arrays.toString(values));
     		}
     		
     		
@@ -198,8 +200,8 @@ public class VisionProcessingThread extends Thread{
          *  -bottom right x
          *  -bottom right y
          */
-        if(centralTarget != null){
-	        towerData[0] = Constants.TOWER_FLAG;
+        towerData[0] = Constants.TOWER_FLAG;
+        if(centralTarget != null) {
 	        towerData[1] = centralTarget.m_bounds.get(0).x;
 	        towerData[2] = centralTarget.m_bounds.get(0).y;
 	        towerData[3] = centralTarget.m_bounds.get(1).x;
@@ -210,7 +212,6 @@ public class VisionProcessingThread extends Thread{
 	        towerData[8] = centralTarget.m_bounds.get(2).y;
         }
         else {
-        	towerData[0] = Constants.TOWER_FLAG;
         	for(int i = 1; i < towerData.length; i++){
         		towerData[i] = 0;
         	}
@@ -290,14 +291,13 @@ public class VisionProcessingThread extends Thread{
 	        m_image = ImageConversion.toMultiSpectral(gImage);
         }
         
+        ballData[0] = Constants.BALL_FLAG;
         if(ball != null){
-        	ballData[0] = Constants.BALL_FLAG;
         	ballData[1] = (int)Math.round(ball.getAverageRadius());
         	ballData[2] = ball.getCenter().x;
         	ballData[3] = ball.getCenter().y;
         }
         else {
-        	ballData[0] = Constants.BALL_FLAG;
         	for(int i = 1; i < ballData.length; i++){
         		ballData[i] = 0;
         	}
