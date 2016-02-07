@@ -35,7 +35,7 @@ import java.net.*;
 public class VisionProcessingThread extends Thread{
     
     //camera resolution
-    private static Dimension m_camRes; 
+    private Dimension m_camRes; 
     //core interface and webcam variables
 	private CameraInterface m_webcam;
 	private MultiSpectral<ImageUInt8> m_image;
@@ -48,7 +48,7 @@ public class VisionProcessingThread extends Thread{
 	
 	//debug display object
 	private DebugDisplay m_display;
-	public static boolean m_showDisplay;
+	public static boolean m_showDisplay = true;
 	
 	//history of values found
 	ValueHistory m_targetHistory;
@@ -327,13 +327,5 @@ public class VisionProcessingThread extends Thread{
         
         return m_targetHistory.m_currData;
     }
-    
-    //mutators
-    public static void setResolution(Dimension resolution) {
-        m_camRes = resolution;
-    }
-    public static void setShowDisplay(boolean showDisplay) {
-        m_showDisplay = showDisplay;
-    }
-    
+ 
 }
