@@ -7,6 +7,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import Constants.TargetType;
 import boofcv.struct.*;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
@@ -63,6 +64,12 @@ public class VisionProcessingThread extends Thread{
         //init history for data
         m_targetHistory = new ValueHistory(m_target);
         //init webcam
+        if(target == Constants.TargetType.ball){
+        	m_camRes = Constants.MED_RES;
+        }
+        else {
+        	m_camRes = Constants.MAX_RES;
+        }
         m_webcam = new CameraInterface(camIndex, m_camRes);
         //init display
         if(m_showDisplay) {
