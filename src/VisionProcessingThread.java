@@ -7,7 +7,6 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
-import Constants.TargetType;
 import boofcv.struct.*;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
