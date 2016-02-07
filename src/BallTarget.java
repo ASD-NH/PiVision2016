@@ -49,4 +49,5 @@ public class BallTarget extends Target {
 		
 		return average;
 	}
+	
 }

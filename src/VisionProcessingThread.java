@@ -50,9 +50,8 @@ public class VisionProcessingThread extends Thread{
 	private DebugDisplay m_display;
 	public static boolean m_showDisplay;
 	
-	private boolean ballHistory[];
-	
-	//image processing related
+	//history of values found
+	ValueHistory m_targetHistory;
 	
     public VisionProcessingThread(int camIndex, Constants.TargetType target){
         this("VisionProcessingThread", camIndex, target);
@@ -61,10 +60,11 @@ public class VisionProcessingThread extends Thread{
         super(name);
         //set target
         m_target = target;
+        //init history for data
+        m_targetHistory = new ValueHistory(m_target);
         //init webcam
         m_webcam = new CameraInterface(camIndex, m_camRes);
         //init display
-        ballHistory = new boolean[Constants.HISTORY_SIZE];
         if(m_showDisplay) {
             System.out.println("[INFO] Initializing display");
             
@@ -212,16 +212,19 @@ public class VisionProcessingThread extends Thread{
         else {
         	towerData[0] = Constants.TOWER_FLAG;
         	for(int i = 1; i < towerData.length; i++){
-        		towerData[i] = -1;
+        		towerData[i] = 0;
         	}
         }
         
-        return towerData;
+        m_targetHistory.updateHistory(towerData);
+        System.out.println(Arrays.toString(m_targetHistory.m_currData));
+        
+        return m_targetHistory.m_currData;
     }
     
     //code to find the ball
     private int[] findBall() {
-        int[] ballData = new int[4];
+        int[] ballData = new int[Constants.BALL_SIZE];
         
         MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
         ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
@@ -287,20 +290,7 @@ public class VisionProcessingThread extends Thread{
 	        m_image = ImageConversion.toMultiSpectral(gImage);
         }
         
-        for (int i = ballHistory.length - 2; i >= 0; i--) {
-        	ballHistory[i + 1] = ballHistory[i];
-        }
-    	//if we've found anything at all this frame, then set this to true, otherwise it's false
-    	ballHistory[0] = ball != null ? true : false;
-    	
-        boolean trueTarget = true;
-        for(boolean b : ballHistory){
-        	if(!b){
-        		trueTarget = false;
-        	}
-        }
-        
-        if(trueTarget){
+        if(ball != null){
         	ballData[0] = Constants.BALL_FLAG;
         	ballData[1] = (int)Math.round(ball.getAverageRadius());
         	ballData[2] = ball.getCenter().x;
@@ -309,13 +299,14 @@ public class VisionProcessingThread extends Thread{
         else {
         	ballData[0] = Constants.BALL_FLAG;
         	for(int i = 1; i < ballData.length; i++){
-        		ballData[i] = -1;
+        		ballData[i] = 0;
         	}
         }
         
-        System.out.println(Arrays.toString(ballData));
+        m_targetHistory.updateHistory(ballData);
+        System.out.println(Arrays.toString(m_targetHistory.m_currData));
         
-        return ballData;
+        return m_targetHistory.m_currData;
     }
     
     //mutators

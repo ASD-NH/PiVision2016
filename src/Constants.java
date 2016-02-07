@@ -30,8 +30,20 @@ public final class Constants {
     //Data flags: Element 0 in sent data arrays; indicate whether received data
     //pertains to tower (1) or ball (2)
     public static final int TOWER_FLAG = 1;
+    public static final int TOWER_SIZE = 9;
     public static final int BALL_FLAG = 2;
+    public static final int BALL_SIZE = 4;
     
+    /* TOWER FILTER */
     //This is the number of frames that have to get a positive match before a target will show up as detected
-    public static final int HISTORY_SIZE = 5;
+    public static final int TOWER_HISTORY_SIZE = 5;
+    //The number of blank data arrays that will be tolerated before we decide the target is no longer there
+    public static final int TOWER_FLICKER_TOLERANCE = 1;
+    
+    /* BALL FILTER */
+    //This is the number of frames that have to get a positive match before a target will show up as detected
+    public static final int BALL_HISTORY_SIZE = 4;
+    //The number of blank data arrays that will be tolerated before we decide the target is no longer there
+    public static final int BALL_FLICKER_TOLERANCE = 3;
+    
 }

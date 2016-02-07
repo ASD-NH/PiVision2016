@@ -8,7 +8,7 @@ abstract class Target {
     public List<PointIndex_I32> m_rawVertexes;
     public List<PointIndex_I32> m_largestSegment;
 	public Dimension m_boundsBox;
-    
+	
     public Target(List<PointIndex_I32> rawVertexes, Dimension cameraRes){
         m_rawVertexes = rawVertexes;
         m_boundsBox = new Dimension();
@@ -64,4 +64,6 @@ abstract class Target {
         
         return largest;
     }
+    
+    
 }
