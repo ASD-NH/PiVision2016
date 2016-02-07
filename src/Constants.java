@@ -42,8 +42,8 @@ public final class Constants {
     
     /* BALL FILTER */
     //This is the number of frames that have to get a positive match before a target will show up as detected
-    public static final int BALL_HISTORY_SIZE = 4;
+    public static final int BALL_HISTORY_SIZE = 8;
     //The number of blank data arrays that will be tolerated before we decide the target is no longer there
-    public static final int BALL_FLICKER_TOLERANCE = 3;
+    public static final int BALL_FLICKER_TOLERANCE = 2;
     
 }

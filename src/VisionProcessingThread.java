@@ -140,6 +140,7 @@ public class VisionProcessingThread extends Thread{
         
         MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
         ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
+        ImageUInt8 satBand = new ImageUInt8(m_camRes.width, m_camRes.height);
         
         //sets m_hsvImage to the hsv version of the source image
         ColorHsv.rgbToHsv_F32(
@@ -148,8 +149,19 @@ public class VisionProcessingThread extends Thread{
         
         //extracts just the value band from the hsv image
         ConvertImage.convert(hsvImage.getBand(2), valueBand);
+        PixelMath.multiply(hsvImage.getBand(1), 255, hsvImage.getBand(1));
+        ConvertImage.convert(hsvImage.getBand(1), satBand);
         
         ImageUInt8 filtered = ThresholdImageOps.localSquare(valueBand, null, 8, 0.9f, false, null, null);
+        ImageUInt8 filteredRed = ThresholdImageOps.threshold(m_image.getBand(2), null, 80, false);
+        ImageUInt8 filteredSat = ThresholdImageOps.threshold(satBand, null, 30, true);
+        
+        for(int x = 0; x < filtered.width; x++){
+        	for(int y = 0; y < filtered.height; y++){
+        		int pixel = filtered.get(x, y) * filteredRed.get(x, y) * filteredSat.get(x, y);
+        		filtered.set(x, y, pixel);
+        	}
+        }
         
         ImageUInt8 displayer = filtered.clone();
         PixelMath.multiply(displayer, 255, displayer);
@@ -170,13 +182,14 @@ public class VisionProcessingThread extends Thread{
         	TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
         	
         	double ratio = possibleTarget.m_boundsBox.getHeight() / possibleTarget.m_boundsBox.getWidth();
+        	double area = possibleTarget.getArea();
         	
         	ratio = ratio > 1 ? 1 / ratio : ratio;
         	
         	double largeAngle = possibleTarget.largestAngle();
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
-        			&& ratio > 0.36 && ratio < 0.55
+        			&& area > 65
         			&& largeAngle < 2.5){
 	        	targets.add(possibleTarget);
         	}
