@@ -132,8 +132,21 @@ public class VisionProcessingThread extends Thread{
     private int[] findTower() {
         int[] towerData = new int[9];
         
-        ImageUInt8 filtered = new ImageUInt8(m_camRes.width, m_camRes.height);
-        ThresholdImageOps.threshold(m_image.getBand(0), filtered, 160, true);
+        MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
+        ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
+        
+        //sets m_hsvImage to the hsv version of the source image
+        ColorHsv.rgbToHsv_F32(
+                ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
+                hsvImage);
+        
+        //extracts just the value band from the hsv image
+        ConvertImage.convert(hsvImage.getBand(2), valueBand);
+        
+        ImageUInt8 filtered = ThresholdImageOps.localSquare(valueBand, null, 8, 0.9f, false, null, null);
+        
+        ImageUInt8 displayer = filtered.clone();
+        PixelMath.multiply(displayer, 255, displayer);
         
         CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2, true, true, ImageUInt8.class, ImageSInt16.class);
         canny.process(filtered, 0.1f, 0.3f, filtered);
@@ -143,7 +156,7 @@ public class VisionProcessingThread extends Thread{
         Graphics2D g = gImage.createGraphics();
         g.setStroke(new BasicStroke(2));
         
-        ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
+        ConvertBufferedImage.convertTo(displayer, gImage, true);
         List<TowerTarget> targets = new ArrayList<TowerTarget>();
         
         for(Contour c : contours){
@@ -157,8 +170,8 @@ public class VisionProcessingThread extends Thread{
         	double largeAngle = possibleTarget.largestAngle();
         	
         	if(vertexes.size() < 25 && vertexes.size() > 5
-        			&& ratio > 0.4 && ratio < 1
-        			&& largeAngle > 1.5 && largeAngle < 1.8){
+        			&& ratio > 0.36 && ratio < 0.55
+        			&& largeAngle < 2.5){
 	        	targets.add(possibleTarget);
         	}
         }
