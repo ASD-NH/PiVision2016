@@ -1,3 +1,6 @@
+package targeting;
+import core.Constants;
+
 public class ValueHistory {
     
     //history before taking out noise and false results

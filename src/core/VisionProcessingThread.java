@@ -1,3 +1,4 @@
+package core;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -15,6 +16,12 @@ import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_F32;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.EllipseRotated_F64;
+import server.NetUtils;
+import targeting.ImageConversion;
+import targeting.TargetingUtils;
+import targeting.ValueHistory;
+import targeting.ball.BallTarget;
+import targeting.tower.TowerTarget;
 import boofcv.alg.color.ColorHsv;
 import boofcv.alg.feature.detect.edge.CannyEdge;
 import boofcv.alg.feature.detect.edge.EdgeContour;
@@ -31,6 +38,7 @@ import boofcv.gui.feature.VisualizeShapes;
 import boofcv.gui.image.*;
 import boofcv.io.image.ConvertBufferedImage;
 import java.net.*;
+import targeting.ValueHistory;;
 
 public class VisionProcessingThread extends Thread{
 
@@ -99,38 +107,17 @@ public class VisionProcessingThread extends Thread{
          //the array to send to the rio
          int[] values;
 
+         //Find the appropriate target
          if (m_target == Constants.TargetType.tower) {
             values = findTower();
          }
-         //equals ball
-         else {
+         else { //equals ball
             values = findBall();
          }
+         
          System.out.println("values presend" + Arrays.toString(values));
-
          //Send data to RIO
-         if (VisionServerThread.address != null){
-
-            System.out.println("[INFO] Creating packet");
-            DatagramPacket dataPacket;
-            byte[] byteData = new byte[1024];
-
-            byteData = NetUtils.intToByte(values);
-
-            dataPacket = new DatagramPacket(byteData, byteData.length,
-                  VisionServerThread.address,VisionServerThread.port);
-            try {
-               System.out.println("[INFO] Attempting to send to " + VisionServerThread.address + " on port: " + VisionServerThread.port);
-               VisionServerThread.socket.send(dataPacket);
-               System.out.println("[INFO] Success");
-            }
-            catch(Exception e){
-               System.out.println("[ERROR] Send failed");
-            }
-            System.out.println("values post send" + Arrays.toString(values));
-         }
-
-
+         NetUtils.SendValues(values);
 
          if (m_showDisplay) {
             //update the image on the display
@@ -139,69 +126,62 @@ public class VisionProcessingThread extends Thread{
       }
    }
 
-
-
+   
+   
    //code to find the tower
    private int[] findTower() {
       int[] towerData = new int[9];
 
-      MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
-      ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
-      ImageUInt8 satBand = new ImageUInt8(m_camRes.width, m_camRes.height);
+      //image to store thresholded image
+      ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
-      //sets m_hsvImage to the hsv version of the source image
-      ColorHsv.rgbToHsv_F32(
-            ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
-            hsvImage);
-
-      //extracts just the value band from the hsv image
-      ConvertImage.convert(hsvImage.getBand(2), valueBand);
-      PixelMath.multiply(hsvImage.getBand(1), 255, hsvImage.getBand(1));
-      ConvertImage.convert(hsvImage.getBand(1), satBand);
-
-      ImageUInt8 filtered = ThresholdImageOps.localSquare(valueBand, null, 8, 0.9f, false, null, null);
-      ImageUInt8 filteredRed = ThresholdImageOps.threshold(m_image.getBand(2), null, 80, false);
-      ImageUInt8 filteredSat = ThresholdImageOps.threshold(satBand, null, 30, true);
-
-      for(int x = 0; x < filtered.width; x++){
-         for(int y = 0; y < filtered.height; y++){
-            int pixel = filtered.get(x, y) * filteredRed.get(x, y) * filteredSat.get(x, y);
-            filtered.set(x, y, pixel);
+      //value to threshold by
+      int thresholdVal = 200;
+      
+      //thresholds all color channels by thresholdVal
+      for(int x = 0; x < m_image.width; x++){
+         for(int y = 0; y < m_image.height; y++){
+            int redPixelVal = m_image.getBand(0).get(x, y);
+            int greenPixelVal = m_image.getBand(1).get(x, y);
+            int bluePixelVal = m_image.getBand(2).get(x, y);
+            
+            if (redPixelVal > thresholdVal && greenPixelVal > thresholdVal && bluePixelVal > thresholdVal) {
+                filtered.set(x, y, 1);
+            }
+            else {
+                filtered.set(x, y, 0);
+            }
          }
       }
 
-      ImageUInt8 displayer = filtered.clone();
-      PixelMath.multiply(displayer, 255, displayer);
-
+      //edge detects the thresholded image
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2, true, true, ImageUInt8.class, ImageSInt16.class);
       canny.process(filtered, 0.1f, 0.3f, filtered);
-
-      List<Contour> contours = BinaryImageOps.contour(filtered, ConnectRule.EIGHT, null);
+      
+      //make a copy of the image here for display purposes
+      ImageUInt8 displayer = filtered.clone();
+      PixelMath.multiply(displayer, 255, displayer);
+      //create some objects for drawing the image to the screen
       BufferedImage gImage = new BufferedImage(filtered.width, filtered.height, 4);
       Graphics2D g = gImage.createGraphics();
       g.setStroke(new BasicStroke(2));
-
       ConvertBufferedImage.convertTo(displayer, gImage, true);
+      
+      //get a list of contours from the thresholded image
+      List<Contour> contours = BinaryImageOps.contour(filtered, ConnectRule.EIGHT, null);
+      //list of potential towers
       List<TowerTarget> targets = new ArrayList<TowerTarget>();
-
+      
       for(Contour c : contours){
          List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
-
-         double ratio = possibleTarget.m_boundsBox.getHeight() / possibleTarget.m_boundsBox.getWidth();
-         double area = possibleTarget.getArea();
-
-         ratio = ratio > 1 ? 1 / ratio : ratio;
-
-         double largeAngle = possibleTarget.largestAngle();
-
-         if(vertexes.size() < 25 && vertexes.size() > 5
-               && area > 65
-               && largeAngle < 2.5){
+         
+         if(vertexes.size() < 25 && vertexes.size() > 5){
             targets.add(possibleTarget);
          }
       }
 
+      //we don't want to look for the central target. We should assume the target can be anywhere. tsk tsk
       TowerTarget centralTarget = null;
       PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
 
@@ -284,6 +264,8 @@ public class VisionProcessingThread extends Thread{
       //edge detect to locate the ball
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
       canny.process(valueBand, 0.1f, 0.3f, valueBand);
+      
+      //objects and settings to display the found ball on the display window
       BufferedImage gImage = null;
       Graphics2D g = null;
       if(m_showDisplay){
@@ -294,10 +276,13 @@ public class VisionProcessingThread extends Thread{
          ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
       }
 
+      //creates contours from the edge detection done earlier
       List<Contour> contours = BinaryImageOps.contour(valueBand, ConnectRule.EIGHT, null);
 
+      //list to store all valid ellipses
       List<BallTarget> validEllipses = new ArrayList<BallTarget>();
 
+      //get the center of the screen to use for vertical deviation calculations
       PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
 
       for(Contour c : contours){

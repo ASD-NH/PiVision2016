@@ -1,3 +1,4 @@
+package targeting;
 import java.awt.image.BufferedImage;
 
 import boofcv.core.image.ConvertImage;
