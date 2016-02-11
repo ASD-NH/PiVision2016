@@ -34,13 +34,13 @@ public class TargetingUtils {
         Contour output = c;
         
         //if the distance between any two sequential points is < minLength, remove that point
-        for (int i = c.external.size() - 1; i > 0; i--) {
-            if (c.external.get(i).distance(c.external.get(i - 1)) < minLength) {
-                c.external.remove(i - 1);
+        for (int i = c.external.size() - 2; i >= 0; i--) {
+            if (c.external.get(i).distance(c.external.get(i + 1)) < minLength) {
+                c.external.remove(i + 1);
             }
         }
         //test the distance between the last point and the first
-        while (c.external.get(c.external.size() - 1).distance(c.external.get(0)) < minLength) {
+        if (c.external.get(c.external.size() - 1).distance(c.external.get(0)) < minLength) {
             c.external.remove(c.external.size() - 1);
         }
         
