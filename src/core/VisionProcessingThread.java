@@ -176,6 +176,17 @@ public class VisionProcessingThread extends Thread{
          List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
          
+         /*
+          * TODO:
+          * PROBABLY DOESN'T WORK
+          * 10 WAS PICKED BASICALLY AT RANDOM PLEASE FIX THIS LATER
+          */
+         c = TargetingUtils.smoothContour(c, 10);
+         
+         /*
+          * TODO:
+          * MODIFY THESE VALUES TO MAKE MORE SENSE WITH THE CONTOUR SMOOTHING ALGORITHM
+          */
          if(vertexes.size() < 25 && vertexes.size() > 5){
             targets.add(possibleTarget);
          }
