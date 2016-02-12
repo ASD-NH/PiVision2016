@@ -1,4 +1,5 @@
 package targeting;
+import java.util.ArrayList;
 import java.util.List;
 
 import boofcv.alg.filter.binary.Contour;
@@ -30,21 +31,19 @@ public class TargetingUtils {
     }
     
     //smooths out a contour by removing small segments (length lower than minLength)
-    public static Contour smoothContour(Contour c, int minLength) {
-        Contour output = c;
-        
-        //if the distance between any two sequential points is < minLength, remove that point
-        for (int i = c.external.size() - 2; i >= 0; i--) {
-            if (c.external.get(i).distance(c.external.get(i + 1)) < minLength) {
-                c.external.remove(i + 1);
-            }
+    public static void smoothContour(List<PointIndex_I32> v, int minLength) {
+        if(v.size() > 0){
+           //if the distance between any two sequential points is < minLength, remove that point
+           for (int i = v.size() - 2; i >= 0; i--) {
+               if (v.get(i).distance(v.get(i + 1)) < minLength) {
+                   v.remove(i + 1);
+               }
+           }
+           //test the distance between the last point and the first
+           if (v.get(v.size() - 1).distance(v.get(0)) < minLength) {
+               v.remove(v.size() - 1);
+           }
         }
-        //test the distance between the last point and the first
-        if (c.external.get(c.external.size() - 1).distance(c.external.get(0)) < minLength) {
-            c.external.remove(c.external.size() - 1);
-        }
-        
-        return output;
     }
     
 }

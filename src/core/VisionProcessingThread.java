@@ -181,7 +181,9 @@ public class VisionProcessingThread extends Thread{
           * PROBABLY DOESN'T WORK
           * 10 WAS PICKED BASICALLY AT RANDOM PLEASE FIX THIS LATER
           */
-         c = TargetingUtils.smoothContour(c, 10);
+         TargetingUtils.smoothContour(vertexes, 10);
+         g.setColor(Color.BLUE);
+         VisualizeShapes.drawPolygon(vertexes, true, g);
          
          /*
           * TODO:
