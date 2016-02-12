@@ -22,9 +22,9 @@ public final class Constants {
     
     /* TOWER FILTER */
     //This is the number of frames that have to get a positive match before a target will show up as detected
-    public static final int TOWER_HISTORY_SIZE = 10;
+    public static final int TOWER_HISTORY_SIZE = 5;
     //The number of blank data arrays that will be tolerated before we decide the target is no longer there
-    public static final int TOWER_FLICKER_TOLERANCE = 0;
+    public static final int TOWER_FLICKER_TOLERANCE = 1;
     
     /* BALL FILTER */
     //This is the number of frames that have to get a positive match before a target will show up as detected

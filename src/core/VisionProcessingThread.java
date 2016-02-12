@@ -165,7 +165,7 @@ public class VisionProcessingThread extends Thread{
       BufferedImage gImage = new BufferedImage(filtered.width, filtered.height, 4);
       Graphics2D g = gImage.createGraphics();
       g.setStroke(new BasicStroke(2));
-      ConvertBufferedImage.convertTo(displayer, gImage, true);
+      ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
       
       //get a list of contours from the thresholded image
       List<Contour> contours = BinaryImageOps.contour(filtered, ConnectRule.EIGHT, null);
@@ -174,23 +174,18 @@ public class VisionProcessingThread extends Thread{
       
       for(Contour c : contours){
          List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external,true,0.05,0,100);
-         TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
          
-         /*
-          * TODO:
-          * PROBABLY DOESN'T WORK
-          * 10 WAS PICKED BASICALLY AT RANDOM PLEASE FIX THIS LATER
-          */
          TargetingUtils.smoothContour(vertexes, 10);
-         g.setColor(Color.BLUE);
-         VisualizeShapes.drawPolygon(vertexes, true, g);
          
-         /*
-          * TODO:
-          * MODIFY THESE VALUES TO MAKE MORE SENSE WITH THE CONTOUR SMOOTHING ALGORITHM
-          */
-         if(vertexes.size() < 25 && vertexes.size() > 5){
+         TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
+         double largeAngle = possibleTarget.largestAngle();
+         
+         if(vertexes.size() == 8
+               && largeAngle > 1.5 && largeAngle < 1.8){
             targets.add(possibleTarget);
+            
+            g.setColor(Color.CYAN);
+            g.drawString(String.valueOf(largeAngle), possibleTarget.getCenter().x, possibleTarget.getCenter().y);
          }
       }
 

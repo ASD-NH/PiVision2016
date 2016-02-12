@@ -22,7 +22,7 @@ public class Segment2D_I32 {
     
     //calculates length and sets it to var length
     protected void setLength() {
-        length = Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+        length = point1.distance(point2);
     }
     
     //accessors
@@ -33,6 +33,7 @@ public class Segment2D_I32 {
         return point2;
     }
     public double getLength() {
+       setLength();
         return length;
     }
 }
