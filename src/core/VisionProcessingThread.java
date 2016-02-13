@@ -179,13 +179,12 @@ public class VisionProcessingThread extends Thread{
          
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
          double largeAngle = possibleTarget.largestAngle();
-         
-         if(vertexes.size() == 8
-               && largeAngle > 1.5 && largeAngle < 1.8){
+                  
+         if(vertexes.size() > 6 && vertexes.size() < 9
+                 && largeAngle < 2.4){
             targets.add(possibleTarget);
-            
-            g.setColor(Color.CYAN);
-            g.drawString(String.valueOf(largeAngle), possibleTarget.getCenter().x, possibleTarget.getCenter().y);
+            g.setColor(Color.PINK);
+            g.drawString(String.valueOf(vertexes.size()), possibleTarget.getCenter().x, possibleTarget.getCenter().y);
          }
       }
 
