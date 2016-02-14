@@ -16,4 +16,14 @@ public class NetUtils {
         return bytes;
         
     }
+    public static int[] byteToInt(byte[] byteArray){
+        int[] intArray = new int[9];
+        int currentByte =0;
+        for (int currentInt = 0; currentInt < intArray.length;currentInt++){
+
+            intArray[currentInt]=(int)byteArray[currentByte] + ((int)(byteArray[currentByte+1]) << 8);
+            currentByte+=2;
+        }
+        return intArray;
+    }
 }

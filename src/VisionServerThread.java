@@ -5,6 +5,7 @@ import java.nio.*;
 
 public class VisionServerThread extends Thread
 {
+    private static int[] exitArray = {9,9,9,9,9,9,9,9,9};
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
@@ -13,7 +14,7 @@ public class VisionServerThread extends Thread
     DatagramPacket responsePacket;
     byte[] receivedData; 
     byte[] sendData;
-    String decodedData;
+    int[] decodedData = new int[9];
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -61,20 +62,17 @@ public class VisionServerThread extends Thread
                     address = receivePacket.getAddress();
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
-                    
-                    decodedData = new String(receivedData,"UTF-8");
+                    decodedData=NetUtils.byteToInt(receivedData);
                     System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
                     sendData = new byte[1024];
                     
-                    if (decodedData.equals("start")){
-                        int[] values ={0,0,0,0,0,0,0,0};
-                        sendData=NetUtils.intToByte(values);
+                    if(Arrays.equals(decodedData,exitArray)){
+                        System.exit(0);
                     }
                     else {
-                        int[] values = {1,2,3,4,5,6,7,8};
+                        int[] values = {1,2,3,4,5,6,7,8,9};
                         sendData=NetUtils.intToByte(values);
-                        
                        
                     }
                     
