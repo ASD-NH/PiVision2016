@@ -34,14 +34,14 @@ public class DebugDisplay {
     //color to draw with
     private Color m_color;
     
-    DebugDisplay(Dimension res) {
+    DebugDisplay(Dimension res, String title) {
         
         m_display = new ImagePanel();
         m_resolution = res;
         
         //init display window
         m_display.setPreferredSize(m_resolution);
-        ShowImages.showWindow(m_display, "Debug Display", true);
+        ShowImages.showWindow(m_display, title, true);
         
     }
     

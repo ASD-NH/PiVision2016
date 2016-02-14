@@ -19,6 +19,26 @@ public class TowerTarget extends Target {
         m_bounds = new ArrayList<PointIndex_I32>();
     }
     
+    public double getArea(){
+    	int[] x = new int[4];
+    	int[] y = new int[4];
+    	double area;
+    	
+    	if(m_bounds.size() == 4){
+	    	for(int i = 0; i < 4; i++){
+	    		x[i] = m_bounds.get(i).x;
+	    		y[i] = m_bounds.get(i).y;
+	    	}
+	    	
+	    	area = 0.5 * (((x[0] - x[2]) * (y[1] - y[3])) - ((x[1] - x[3]) * (y[0] - y[2])));
+    	}
+    	else {
+    		area = -1;
+    	}
+    	
+    	return area;
+    }
+    
     public PointIndex_I32 getCenter(){
         
         int centerX = (m_bounds.get(0).x + m_bounds.get(2).x) / 2;
