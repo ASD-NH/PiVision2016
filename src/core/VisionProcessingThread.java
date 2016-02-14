@@ -23,12 +23,14 @@ import targeting.ValueHistory;
 import targeting.ball.BallTarget;
 import targeting.tower.TowerTarget;
 import boofcv.alg.color.ColorHsv;
+import boofcv.alg.distort.ImageDistortBasic;
 import boofcv.alg.feature.detect.edge.CannyEdge;
 import boofcv.alg.feature.detect.edge.EdgeContour;
 import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.filter.binary.GThresholdImageOps;
 import boofcv.alg.filter.binary.ThresholdImageOps;
+import boofcv.alg.interpolate.InterpolatePixel;
 import boofcv.alg.misc.PixelMath;
 import boofcv.alg.shapes.ShapeFittingOps;
 import boofcv.alg.shapes.FitData;
@@ -252,25 +254,43 @@ public class VisionProcessingThread extends Thread{
    //code to find the ball
    private int[] findBall() {
       int[] ballData = new int[Constants.BALL_SIZE];
+      Dimension cropPos = new Dimension(60, 110);
+      Dimension cropSize = new Dimension(200, 130);
 
       MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
       ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
-
+      
       //sets m_hsvImage to the hsv version of the source image
       ColorHsv.rgbToHsv_F32(
             ImageConversion.MultiSpectralUInt8ToFloat32(m_image),
             hsvImage);
 
       //extracts just the value band from the hsv image
-      ConvertImage.convert(hsvImage.getBand(2), valueBand);
+      //ConvertImage.convert(hsvImage.getBand(2), valueBand);
+      valueBand = m_image.getBand(2).clone();
       //valueBand = m_image.getBand(0).clone();
-
+      
+      for(int x=0;x<valueBand.width;x++){
+          for(int y=0;y<valueBand.height;y++){
+              int minX = cropPos.width;
+              int minY = cropPos.height;
+              int maxX = cropPos.width + cropSize.width;
+              int maxY = cropPos.height + cropSize.height;
+              if(x < minX || x > maxX || y < minY || y > maxY){
+                  valueBand.set(x, y, 0);
+              }
+          }
+      }
+      
       //threshold the image to make the ball clear
       valueBand = ThresholdImageOps.localSquare(valueBand, null, 20, 0.98f, true, null, null);
-
+      
       //edge detect to locate the ball
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
-      canny.process(valueBand, 0.1f, 0.3f, valueBand);
+      canny.process(valueBand, 0.252f, 1f, valueBand);
+
+      ImageUInt8 displayer = valueBand.clone();
+      PixelMath.multiply(displayer, 255, displayer);
       
       //objects and settings to display the found ball on the display window
       BufferedImage gImage = null;
@@ -293,7 +313,7 @@ public class VisionProcessingThread extends Thread{
       PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
 
       for(Contour c : contours){
-         List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.05, 0, 100);
+         List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.05, 0, 180);
 
          BallTarget circle = new BallTarget(vertexes, m_camRes);
 
@@ -307,9 +327,9 @@ public class VisionProcessingThread extends Thread{
          double averageRadius = (circle.m_shape.a + circle.m_shape.b) / 2;
 
          int verticalDeviation = Math.abs(screenCenter.y - circle.getCenter().y);
-
-         if(ratio < 1.2 && averageRadius > 30
-               && verticalDeviation < 20){
+         
+         if(ratio < 1.3 && averageRadius > 30
+               /*&& verticalDeviation < 20*/){
             validEllipses.add(circle);
          }
       }
