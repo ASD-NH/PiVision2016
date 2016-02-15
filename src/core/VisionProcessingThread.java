@@ -138,7 +138,7 @@ public class VisionProcessingThread extends Thread{
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
       //value to threshold by
-      int thresholdVal = 200;
+      int thresholdVal = 220;
       
       //thresholds all color channels by thresholdVal
       for(int x = 0; x < m_image.width; x++){
@@ -181,12 +181,10 @@ public class VisionProcessingThread extends Thread{
          
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
          double largeAngle = possibleTarget.largestAngle();
-                  
-         if(vertexes.size() > 6 && vertexes.size() < 9
-                 && largeAngle < 2.4){
+         
+         if(vertexes.size() > 5 && vertexes.size() < 9
+                 /*&& largeAngle < 2.4*/){
             targets.add(possibleTarget);
-            g.setColor(Color.PINK);
-            g.drawString(String.valueOf(vertexes.size()), possibleTarget.getCenter().x, possibleTarget.getCenter().y);
          }
       }
 
