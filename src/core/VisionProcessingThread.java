@@ -252,8 +252,8 @@ public class VisionProcessingThread extends Thread{
    //code to find the ball
    private int[] findBall() {
       int[] ballData = new int[Constants.BALL_SIZE];
-      Dimension cropPos = new Dimension(50, 50);
-      Dimension cropSize = new Dimension(220, 150);
+      Dimension cropPos = new Dimension(50, 70);
+      Dimension cropSize = new Dimension(220, 130);
 
       MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
       ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
@@ -279,7 +279,7 @@ public class VisionProcessingThread extends Thread{
               }
               else {
                   int pixel = valueBand.get(x, y);
-                  if(pixel < 130){
+                  if(pixel < 110){
                       pixel = 0;
                   }
                   valueBand.set(x, y, pixel);
