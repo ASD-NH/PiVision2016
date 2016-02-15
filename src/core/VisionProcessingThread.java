@@ -254,8 +254,8 @@ public class VisionProcessingThread extends Thread{
    //code to find the ball
    private int[] findBall() {
       int[] ballData = new int[Constants.BALL_SIZE];
-      Dimension cropPos = new Dimension(60, 110);
-      Dimension cropSize = new Dimension(200, 130);
+      Dimension cropPos = new Dimension(50, 50);
+      Dimension cropSize = new Dimension(220, 150);
 
       MultiSpectral<ImageFloat32> hsvImage = new MultiSpectral<ImageFloat32>(ImageFloat32.class, m_camRes.width, m_camRes.height, 3);
       ImageUInt8 valueBand = new ImageUInt8(m_camRes.width, m_camRes.height);
@@ -279,18 +279,25 @@ public class VisionProcessingThread extends Thread{
               if(x < minX || x > maxX || y < minY || y > maxY){
                   valueBand.set(x, y, 0);
               }
+              else {
+                  int pixel = valueBand.get(x, y);
+                  if(pixel < 130){
+                      pixel = 0;
+                  }
+                  valueBand.set(x, y, pixel);
+              }
           }
       }
+      
+      ImageUInt8 displayer = valueBand.clone();
+      //PixelMath.multiply(displayer, 255, displayer);
       
       //threshold the image to make the ball clear
       valueBand = ThresholdImageOps.localSquare(valueBand, null, 20, 0.98f, true, null, null);
       
       //edge detect to locate the ball
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2,true, true, ImageUInt8.class, ImageSInt16.class);
-      canny.process(valueBand, 0.252f, 1f, valueBand);
-
-      ImageUInt8 displayer = valueBand.clone();
-      PixelMath.multiply(displayer, 255, displayer);
+      canny.process(valueBand, 0.26f, 1f, valueBand);
       
       //objects and settings to display the found ball on the display window
       BufferedImage gImage = null;
@@ -300,7 +307,7 @@ public class VisionProcessingThread extends Thread{
          g = gImage.createGraphics();
          g.setStroke(new BasicStroke(2));
 
-         ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
+         ConvertBufferedImage.convertTo(displayer, gImage, true);
       }
 
       //creates contours from the edge detection done earlier
@@ -325,10 +332,15 @@ public class VisionProcessingThread extends Thread{
          }
 
          double averageRadius = (circle.m_shape.a + circle.m_shape.b) / 2;
+         boolean exceedsFrame = false;
+         if(averageRadius > cropSize.height || averageRadius > cropSize.width){
+             exceedsFrame = true;
+         }
 
          int verticalDeviation = Math.abs(screenCenter.y - circle.getCenter().y);
          
-         if(ratio < 1.3 && averageRadius > 30
+         if(ratio < 1.2 && averageRadius > 30
+                 && !exceedsFrame
                /*&& verticalDeviation < 20*/){
             validEllipses.add(circle);
          }
