@@ -68,6 +68,8 @@ public class VisionServerThread extends Thread
                     sendData = new byte[1024];
                     
                     if(Arrays.equals(decodedData,exitArray)){
+                        System.out.println("kill received");
+                        Runtime.getRuntime().exec("shutdown -h now");
                         System.exit(0);
                     }
                     else {
