@@ -58,7 +58,7 @@ public class VisionProcessingThread extends Thread{
 
    //debug display object
    private DebugDisplay m_display;
-   public static boolean m_showDisplay = true;
+   public static boolean m_showDisplay = false;
 
    //history of values found
    ValueHistory m_targetHistory;
