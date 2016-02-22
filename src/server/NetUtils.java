@@ -42,7 +42,7 @@ public class NetUtils {
             catch(Exception e){
                System.out.println("[ERROR] Send failed");
             }
-            System.out.println("values post send" + Arrays.toString(values));
+            //System.out.println("values post send" + Arrays.toString(values));
          }
     }
     
