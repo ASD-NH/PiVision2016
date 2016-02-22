@@ -117,7 +117,7 @@ public class VisionProcessingThread extends Thread{
             values = findBall();
          }
          
-         System.out.println("values presend" + Arrays.toString(values));
+         //System.out.println("values presend" + Arrays.toString(values));
          //Send data to RIO
          NetUtils.SendValues(values);
 
