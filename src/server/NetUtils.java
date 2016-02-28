@@ -1,7 +1,6 @@
 package server;
 
 import java.net.DatagramPacket;
-import java.util.Arrays;
 
 import core.VisionServerThread;
 

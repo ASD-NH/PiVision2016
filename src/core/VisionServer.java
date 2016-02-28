@@ -1,10 +1,8 @@
 package core;
-import java.util.*;
+import java.io.IOException;
+
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
-
-import java.lang.*;
-import java.io.*;
 
 public class VisionServer{
     //top left port is 1 top right port is 0

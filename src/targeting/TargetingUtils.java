@@ -1,11 +1,7 @@
 package targeting;
-import java.util.ArrayList;
 import java.util.List;
 
-import boofcv.alg.filter.binary.Contour;
 import boofcv.struct.PointIndex_I32;
-import georegression.struct.point.Point2D_I32;
-import georegression.struct.shapes.EllipseRotated_F64;
 import targeting.ball.BallTarget;
 
 public class TargetingUtils {
