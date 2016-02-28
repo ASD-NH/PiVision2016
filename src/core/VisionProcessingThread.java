@@ -170,34 +170,31 @@ public class VisionProcessingThread extends Thread{
          
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
          
-         if(vertexes.size() > 5 && vertexes.size() < 9
-                 /*&& largeAngle < 2.4*/){
+         if(vertexes.size() > 5 && vertexes.size() < 9){
             targets.add(possibleTarget);
          }
       }
 
-      //we don't want to look for the central target. We should assume the target can be anywhere. tsk tsk
-      TowerTarget centralTarget = null;
-      PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
-
+      //pick the best matching target out of the list
+      
+      TowerTarget bestTarget = null;
       for(TowerTarget t : targets){
-         if(centralTarget == null){
-            centralTarget = t;
+         if(bestTarget == null){
+            bestTarget = t;
          }
          else {
-            PointIndex_I32 oldCenter = centralTarget.getCenter();
-            PointIndex_I32 newCenter = t.getCenter();
-
-            if(newCenter.distance(screenCenter) < oldCenter.distance(screenCenter)){
-               centralTarget = t;
+            //0.25 is the weight between 0 and 1 to give the vertex
+            if (t.getCertainty(0.25) > bestTarget.getCertainty(0.25)) {
+               bestTarget = t;
             }
          }
       }
 
-      if(centralTarget != null && m_showDisplay){
+      //draw the image
+      if(bestTarget != null && m_showDisplay){
          g.setColor(Color.GREEN);
-         VisualizeShapes.drawPolygon(centralTarget.m_bounds, true, g);
-         g.drawOval((int)(centralTarget.getCenter().x - 2.5), (int)(centralTarget.getCenter().y - 2.5), 5, 5);
+         VisualizeShapes.drawPolygon(bestTarget.m_bounds, true, g);
+         g.drawOval((int)(bestTarget.getCenter().x - 2.5), (int)(bestTarget.getCenter().y - 2.5), 5, 5);
       }
 
       m_image = ImageConversion.toMultiSpectral(gImage);
@@ -215,15 +212,15 @@ public class VisionProcessingThread extends Thread{
        *  -bottom right y
        */
       towerData[0] = Constants.TOWER_FLAG;
-      if(centralTarget != null) {
-         towerData[1] = centralTarget.m_bounds.get(0).x;
-         towerData[2] = centralTarget.m_bounds.get(0).y;
-         towerData[3] = centralTarget.m_bounds.get(1).x;
-         towerData[4] = centralTarget.m_bounds.get(1).y;
-         towerData[5] = centralTarget.m_bounds.get(3).x;
-         towerData[6] = centralTarget.m_bounds.get(3).y;
-         towerData[7] = centralTarget.m_bounds.get(2).x;
-         towerData[8] = centralTarget.m_bounds.get(2).y;
+      if(bestTarget != null) {
+         towerData[1] = bestTarget.m_bounds.get(0).x;
+         towerData[2] = bestTarget.m_bounds.get(0).y;
+         towerData[3] = bestTarget.m_bounds.get(1).x;
+         towerData[4] = bestTarget.m_bounds.get(1).y;
+         towerData[5] = bestTarget.m_bounds.get(3).x;
+         towerData[6] = bestTarget.m_bounds.get(3).y;
+         towerData[7] = bestTarget.m_bounds.get(2).x;
+         towerData[8] = bestTarget.m_bounds.get(2).y;
       }
       else {
          for(int i = 1; i < towerData.length; i++){

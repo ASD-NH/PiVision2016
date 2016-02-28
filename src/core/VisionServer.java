@@ -16,7 +16,8 @@ public class VisionServer{
         
             new VisionServerThread().start();
             new VisionProcessingThread(0, Constants.TargetType.tower).start();
-            new VisionProcessingThread(1, Constants.TargetType.ball).start();        
+            //new VisionProcessingThread(1, Constants.TargetType.ball).start(); 
+            
     }
     
 }

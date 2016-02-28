@@ -15,6 +15,32 @@ public class TowerTarget extends Target {
         m_bounds = findBounds(cameraRes);
     }
     
+    /* Two step certainty check
+     *   1. 8 vertexes is better than not 8 vertexes
+     *   2. Shape being closer to a rectangle is better
+     */
+    public double getCertainty(double vertexWeight) {
+       double certainty = 0;
+       double weight = vertexWeight;
+       
+       /* step 1 of the check */
+       
+       if (m_rawVertexes.size() == 8) {
+          certainty = weight;
+       }
+       
+       /* step 2 of the check */
+       
+       //calculate the difference between the 2 diagonals as a number between 0 and 1
+       double diagonal1 = m_bounds.get(0).distance(m_bounds.get(2));
+       double diagonal2 = m_bounds.get(1).distance(m_bounds.get(3));
+       double error = Math.min(diagonal1, diagonal2) / Math.max(diagonal1, diagonal2);
+       //normalize that value to "fill" the remaining space after step 1 is applied to certainty
+       certainty *= error * (1 - weight);
+       
+       return certainty;
+    }
+    
     public double getArea(){
     	int[] x = new int[4];
     	int[] y = new int[4];
