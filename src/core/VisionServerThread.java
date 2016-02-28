@@ -1,11 +1,14 @@
+package core;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import server.NetUtils;
+
 import java.nio.*;
 
 public class VisionServerThread extends Thread
 {
-    private static int[] exitArray = {9,9,9,9,9,9,9,9,9};
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
@@ -14,7 +17,7 @@ public class VisionServerThread extends Thread
     DatagramPacket responsePacket;
     byte[] receivedData; 
     byte[] sendData;
-    int[] decodedData = new int[9];
+    String decodedData;
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -62,17 +65,20 @@ public class VisionServerThread extends Thread
                     address = receivePacket.getAddress();
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
-                    decodedData=NetUtils.byteToInt(receivedData);
+                    
+                    decodedData = new String(receivedData,"UTF-8");
                     System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
                     sendData = new byte[1024];
                     
-                    if(Arrays.equals(decodedData,exitArray)){
-                        System.exit(0);
+                    if (decodedData.equals("start")){
+                        int[] values ={0,0,0,0,0,0,0,0};
+                        sendData=NetUtils.intToByte(values);
                     }
                     else {
-                        int[] values = {1,2,3,4,5,6,7,8,9};
+                        int[] values = {1,2,3,4,5,6,7,8};
                         sendData=NetUtils.intToByte(values);
+                        
                        
                     }
                     

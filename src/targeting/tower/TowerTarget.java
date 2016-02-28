@@ -1,22 +1,18 @@
+package targeting.tower;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
 import boofcv.struct.PointIndex_I32;
+import targeting.Target;
 
 public class TowerTarget extends Target {
     public List<PointIndex_I32> m_bounds;
     
-    public TowerTarget(List<PointIndex_I32> rawVertexes, Dimension cameraRes){
-        m_rawVertexes = rawVertexes;
+    public TowerTarget(List<PointIndex_I32> rawVertexes, Dimension cameraRes) {
+        super(rawVertexes);
         m_boundsBox = new Dimension();
         m_bounds = findBounds(cameraRes);
-    }
-    
-    public TowerTarget(){
-        m_rawVertexes = new ArrayList<PointIndex_I32>();
-        m_boundsBox = new Dimension();
-        m_bounds = new ArrayList<PointIndex_I32>();
     }
     
     public double getArea(){
