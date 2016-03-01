@@ -1,46 +1,35 @@
 package core;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 
-import boofcv.struct.*;
+import boofcv.alg.color.ColorHsv;
+import boofcv.alg.feature.detect.edge.CannyEdge;
+import boofcv.alg.filter.binary.BinaryImageOps;
+import boofcv.alg.filter.binary.Contour;
+import boofcv.alg.filter.binary.ThresholdImageOps;
+import boofcv.alg.misc.PixelMath;
+import boofcv.alg.shapes.ShapeFittingOps;
+import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
+import boofcv.gui.feature.VisualizeShapes;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.ConnectRule;
+import boofcv.struct.PointIndex_I32;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageSInt16;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-import georegression.struct.point.Point2D_F32;
-import georegression.struct.point.Point2D_I32;
-import georegression.struct.shapes.EllipseRotated_F64;
 import server.NetUtils;
 import targeting.ImageConversion;
 import targeting.TargetingUtils;
 import targeting.ValueHistory;
 import targeting.ball.BallTarget;
-import targeting.tower.TowerTarget;
-import boofcv.alg.color.ColorHsv;
-import boofcv.alg.distort.ImageDistortBasic;
-import boofcv.alg.feature.detect.edge.CannyEdge;
-import boofcv.alg.feature.detect.edge.EdgeContour;
-import boofcv.alg.filter.binary.BinaryImageOps;
-import boofcv.alg.filter.binary.Contour;
-import boofcv.alg.filter.binary.GThresholdImageOps;
-import boofcv.alg.filter.binary.ThresholdImageOps;
-import boofcv.alg.interpolate.InterpolatePixel;
-import boofcv.alg.misc.PixelMath;
-import boofcv.alg.shapes.ShapeFittingOps;
-import boofcv.alg.shapes.FitData;
-import boofcv.core.image.ConvertImage;
-import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
-import boofcv.gui.feature.VisualizeShapes;
-import boofcv.gui.image.*;
-import boofcv.io.image.ConvertBufferedImage;
-import java.net.*;
-import targeting.ValueHistory;;
+import targeting.tower.TowerTarget;;
 
 public class VisionProcessingThread extends Thread{
 
@@ -180,7 +169,6 @@ public class VisionProcessingThread extends Thread{
          TargetingUtils.smoothContour(vertexes, 10);
          
          TowerTarget possibleTarget = new TowerTarget(vertexes, m_camRes);
-         double largeAngle = possibleTarget.largestAngle();
          
          if(vertexes.size() > 5 && vertexes.size() < 9
                  /*&& largeAngle < 2.4*/){
@@ -314,15 +302,10 @@ public class VisionProcessingThread extends Thread{
       //list to store all valid ellipses
       List<BallTarget> validEllipses = new ArrayList<BallTarget>();
 
-      //get the center of the screen to use for vertical deviation calculations
-      PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
-
       for(Contour c : contours){
          List<PointIndex_I32> vertexes = ShapeFittingOps.fitPolygon(c.external, false, 0.05, 0, 180);
 
          BallTarget circle = new BallTarget(vertexes, m_camRes);
-
-         double largestAngle = circle.largestAngle();
 
          double ratio = circle.m_shape.a / circle.m_shape.b;
          if(ratio < 1){
@@ -335,8 +318,6 @@ public class VisionProcessingThread extends Thread{
              exceedsFrame = true;
          }
 
-         int verticalDeviation = Math.abs(screenCenter.y - circle.getCenter().y);
-         
          if(ratio < 1.2 && averageRadius > 30
                  && !exceedsFrame
                /*&& verticalDeviation < 20*/){

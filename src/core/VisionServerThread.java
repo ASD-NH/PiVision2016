@@ -1,11 +1,11 @@
 package core;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.BindException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import server.NetUtils;
-
-import java.nio.*;
 
 public class VisionServerThread extends Thread
 {

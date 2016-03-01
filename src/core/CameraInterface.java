@@ -1,10 +1,10 @@
 package core;
 import java.awt.Dimension;
-import java.awt.image.*;
+
 import com.github.sarxos.webcam.Webcam;
 
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.image.*;
+import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.MultiSpectral;
 import targeting.ImageConversion;
 
 public class CameraInterface {
