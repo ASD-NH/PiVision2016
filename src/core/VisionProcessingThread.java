@@ -138,7 +138,7 @@ public class VisionProcessingThread extends Thread{
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
       //value to threshold by
-      int thresholdVal = 220;
+      int thresholdVal = 245;
       
       //thresholds all color channels by thresholdVal
       for(int x = 0; x < m_image.width; x++){
@@ -167,7 +167,7 @@ public class VisionProcessingThread extends Thread{
       BufferedImage gImage = new BufferedImage(filtered.width, filtered.height, 4);
       Graphics2D g = gImage.createGraphics();
       g.setStroke(new BasicStroke(2));
-      ConvertBufferedImage.convertTo_U8(m_image, gImage, true);
+      ConvertBufferedImage.convertTo(displayer, gImage, true);
       
       //get a list of contours from the thresholded image
       List<Contour> contours = BinaryImageOps.contour(filtered, ConnectRule.EIGHT, null);
