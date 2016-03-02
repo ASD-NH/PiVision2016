@@ -184,8 +184,8 @@ public class VisionProcessingThread extends Thread{
             largestTarget = t;
          }
          else {
-            Double oldsize = largestTarget.getArea();
-            Double newsize = t.getArea();
+            double oldsize = largestTarget.getArea();
+            double newsize = t.getArea();
 
             if(newsize > oldsize){
                largestTarget = t;
