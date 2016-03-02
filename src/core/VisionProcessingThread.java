@@ -127,7 +127,7 @@ public class VisionProcessingThread extends Thread{
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
       //value to threshold by
-      int thresholdVal = 245;
+      int thresholdVal = 230;
       
       //thresholds all color channels by thresholdVal
       for(int x = 0; x < m_image.width; x++){
@@ -177,27 +177,26 @@ public class VisionProcessingThread extends Thread{
       }
 
       //we don't want to look for the central target. We should assume the target can be anywhere. tsk tsk
-      TowerTarget centralTarget = null;
-      PointIndex_I32 screenCenter = new PointIndex_I32(m_camRes.width / 2, m_camRes.height / 2, 0);
+      TowerTarget largestTarget = null;
 
       for(TowerTarget t : targets){
-         if(centralTarget == null){
-            centralTarget = t;
+         if(largestTarget == null){
+            largestTarget = t;
          }
          else {
-            PointIndex_I32 oldCenter = centralTarget.getCenter();
-            PointIndex_I32 newCenter = t.getCenter();
+            Double oldsize = largestTarget.getArea();
+            Double newsize = t.getArea();
 
-            if(newCenter.distance(screenCenter) < oldCenter.distance(screenCenter)){
-               centralTarget = t;
+            if(newsize > oldsize){
+               largestTarget = t;
             }
          }
       }
 
-      if(centralTarget != null && m_showDisplay){
+      if(largestTarget != null && m_showDisplay){
          g.setColor(Color.GREEN);
-         VisualizeShapes.drawPolygon(centralTarget.m_bounds, true, g);
-         g.drawOval((int)(centralTarget.getCenter().x - 2.5), (int)(centralTarget.getCenter().y - 2.5), 5, 5);
+         VisualizeShapes.drawPolygon(largestTarget.m_bounds, true, g);
+         g.drawOval((int)(largestTarget.getCenter().x - 2.5), (int)(largestTarget.getCenter().y - 2.5), 5, 5);
       }
 
       m_image = ImageConversion.toMultiSpectral(gImage);
@@ -215,15 +214,15 @@ public class VisionProcessingThread extends Thread{
        *  -bottom right y
        */
       towerData[0] = Constants.TOWER_FLAG;
-      if(centralTarget != null) {
-         towerData[1] = centralTarget.m_bounds.get(0).x;
-         towerData[2] = centralTarget.m_bounds.get(0).y;
-         towerData[3] = centralTarget.m_bounds.get(1).x;
-         towerData[4] = centralTarget.m_bounds.get(1).y;
-         towerData[5] = centralTarget.m_bounds.get(3).x;
-         towerData[6] = centralTarget.m_bounds.get(3).y;
-         towerData[7] = centralTarget.m_bounds.get(2).x;
-         towerData[8] = centralTarget.m_bounds.get(2).y;
+      if(largestTarget != null) {
+         towerData[1] = largestTarget.m_bounds.get(0).x;
+         towerData[2] = largestTarget.m_bounds.get(0).y;
+         towerData[3] = largestTarget.m_bounds.get(1).x;
+         towerData[4] = largestTarget.m_bounds.get(1).y;
+         towerData[5] = largestTarget.m_bounds.get(3).x;
+         towerData[6] = largestTarget.m_bounds.get(3).y;
+         towerData[7] = largestTarget.m_bounds.get(2).x;
+         towerData[8] = largestTarget.m_bounds.get(2).y;
       }
       else {
          for(int i = 1; i < towerData.length; i++){
