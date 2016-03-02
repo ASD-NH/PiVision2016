@@ -1,18 +1,16 @@
+package core;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 
-import boofcv.alg.filter.binary.Contour;
 import boofcv.gui.feature.VisualizeShapes;
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.EllipseRotated_F64;

@@ -1,3 +1,4 @@
+package targeting.ball;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +7,14 @@ import boofcv.alg.shapes.ShapeFittingOps;
 import boofcv.struct.PointIndex_I32;
 import georegression.struct.point.Point2D_I32;
 import georegression.struct.shapes.EllipseRotated_F64;
+import targeting.Target;
 
 public class BallTarget extends Target {
 	public EllipseRotated_F64 m_shape;
 	private PointIndex_I32 m_center;
 	
 	public BallTarget(List<PointIndex_I32> rawVertexes, Dimension cameraRes) {
-		super(rawVertexes, cameraRes);
+		super(rawVertexes);
 		List<Point2D_I32> tempVertexes = new ArrayList<Point2D_I32>();
 		
 		for(PointIndex_I32 v : rawVertexes){
@@ -29,12 +31,6 @@ public class BallTarget extends Target {
 		int y = (int) Math.round(m_shape.center.y);
 		
 		m_center = new PointIndex_I32(x, y, 0);
-	}
-
-	public BallTarget() {
-		super();
-		m_shape = new EllipseRotated_F64();
-		m_center = new PointIndex_I32();
 	}
 
 	public PointIndex_I32 getCenter() {

@@ -1,19 +1,21 @@
+package core;
 import java.awt.Dimension;
-import java.awt.image.*;
+
 import com.github.sarxos.webcam.Webcam;
 
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.image.*;
+import boofcv.struct.image.ImageUInt8;
+import boofcv.struct.image.MultiSpectral;
+import targeting.ImageConversion;
 
 public class CameraInterface {
 
 	private Webcam m_webcam = null;
-	private Dimension[] m_supportedResolutions;
 	
 	//create with default webcam
 	CameraInterface(Dimension resolution) {
 		this(0, resolution);
 	}
+	
 	//create with index of a webcam (use if there are multiple webcams)
 	CameraInterface(int cameraIndex, Dimension resolution) {
 		m_webcam = Webcam.getWebcams().get(cameraIndex);
@@ -25,9 +27,6 @@ public class CameraInterface {
 		
 		m_webcam.open();
 	}
-	
-	//converts source image type to boof type
-	
 	
 	public MultiSpectral<ImageUInt8> getImage() {
 		//return converted image
