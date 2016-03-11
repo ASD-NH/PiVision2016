@@ -97,15 +97,15 @@ public class VisionProcessingThread extends Thread{
 
          //the array to send to the rio
          int[] values;
-
+         
          //Find the appropriate target
          if (m_target == Constants.TargetType.tower) {
-            values = findTower();
+            values = findTower(VisionServerThread.newDataRequested());
          }
          else { //equals ball
             values = findBall();
          }
-         
+      
          //System.out.println("values presend" + Arrays.toString(values));
          //Send data to RIO
          NetUtils.SendValues(values);
@@ -117,10 +117,11 @@ public class VisionProcessingThread extends Thread{
       }
    }
 
+
    
    
    //code to find the tower
-   private int[] findTower() {
+   private int[] findTower(boolean newDataRequested) {
       int[] towerData = new int[9];
 
       //image to store thresholded image
@@ -231,6 +232,11 @@ public class VisionProcessingThread extends Thread{
       }
 
       m_targetHistory.updateHistory(towerData);
+      
+      if (newDataRequested) {
+         towerData[0] = 3;
+      }
+      
       System.out.println(Arrays.toString(m_targetHistory.m_currData));
 
       return m_targetHistory.m_currData;

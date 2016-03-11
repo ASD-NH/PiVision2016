@@ -9,6 +9,10 @@ import server.NetUtils;
 
 public class VisionServerThread extends Thread
 {
+   
+   
+    private static boolean newDataRequested = false;
+    
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
@@ -54,6 +58,8 @@ public class VisionServerThread extends Thread
             return;
         }
         else {
+            
+           
            
             while(running){
                 try{
@@ -75,6 +81,11 @@ public class VisionServerThread extends Thread
                         int[] values ={0,0,0,0,0,0,0,0};
                         sendData=NetUtils.intToByte(values);
                     }
+                    else if (decodedData.equals("newDataRequested")) {
+                       newDataRequested = true;
+                       int[] values = {0,3,3,3,3,3,3,3,3,3};
+                       sendData=NetUtils.intToByte(values);
+                    }
                     else {
                         int[] values = {1,2,3,4,5,6,7,8};
                         sendData=NetUtils.intToByte(values);
@@ -93,6 +104,16 @@ public class VisionServerThread extends Thread
               
             }
         }
+    }
+    
+    public static boolean newDataRequested() {
+       if (newDataRequested) {
+          newDataRequested = false;
+          return true;
+       }
+       else {
+          return false;
+       }
     }
 
 }
