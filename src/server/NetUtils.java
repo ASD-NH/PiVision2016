@@ -21,6 +21,15 @@ public class NetUtils {
         return bytes;
         
     }
+    public static int[] byteToInt(byte[] bytes){
+       int[] values = new int[9];
+       int currentByte=0;
+       for(int currentInt=0;currentInt <9;currentInt++){
+          values[currentInt]=(int)bytes[currentByte] + ((int)(bytes[currentByte+1])<<8);
+          currentByte+=2;
+       }
+       return values;
+    }
     
     public static void SendValues(int[] values) {
         if (VisionServerThread.address != null){

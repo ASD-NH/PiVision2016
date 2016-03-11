@@ -4,6 +4,7 @@ import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 import server.NetUtils;
 
@@ -21,7 +22,9 @@ public class VisionServerThread extends Thread
     DatagramPacket responsePacket;
     byte[] receivedData; 
     byte[] sendData;
-    String decodedData;
+    int[] decodedData;
+    int[] startArray ={0,0,0,0,0,0,0,0,0};
+    int[] requestArray ={3,3,3,3,3,3,3,3,3};
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -72,16 +75,16 @@ public class VisionServerThread extends Thread
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
                     
-                    decodedData = new String(receivedData,"UTF-8");
+                    decodedData = NetUtils.byteToInt(receivedData);
                     System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
                     sendData = new byte[1024];
                     
-                    if (decodedData.equals("start")){
+                    if (Arrays.equals(decodedData,startArray)){
                         int[] values ={0,0,0,0,0,0,0,0};
                         sendData=NetUtils.intToByte(values);
                     }
-                    else if (decodedData.equals("newDataRequested")) {
+                    else if (Arrays.equals(decodedData,requestArray)) {
                        newDataRequested = true;
                        int[] values = {0,3,3,3,3,3,3,3,3,3};
                        sendData=NetUtils.intToByte(values);
