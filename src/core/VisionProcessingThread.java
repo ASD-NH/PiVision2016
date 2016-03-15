@@ -123,6 +123,7 @@ public class VisionProcessingThread extends Thread{
    //code to find the tower
    private int[] findTower(boolean newDataRequested) {
       int[] towerData = new int[9];
+      int[] encoders = VisionServerThread.decodedData;
 
       //image to store thresholded image
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
@@ -178,26 +179,26 @@ public class VisionProcessingThread extends Thread{
       }
 
       //we don't want to look for the central target. We should assume the target can be anywhere. tsk tsk
-      TowerTarget largestTarget = null;
+      TowerTarget squareTarget = null;
 
       for(TowerTarget t : targets){
-         if(largestTarget == null){
-            largestTarget = t;
+         if(squareTarget == null){
+            squareTarget = t;
          }
          else {
-            double oldsize = largestTarget.getArea();
-            double newsize = t.getArea();
+            double oldsquare = squareTarget.getSquareness();
+            double newsquare = t.getSquareness();
 
-            if(newsize > oldsize){
-               largestTarget = t;
+            if(newsquare > oldsquare){
+               squareTarget = t;
             }
          }
       }
 
-      if(largestTarget != null && m_showDisplay){
+      if(squareTarget != null && m_showDisplay){
          g.setColor(Color.GREEN);
-         VisualizeShapes.drawPolygon(largestTarget.m_bounds, true, g);
-         g.drawOval((int)(largestTarget.getCenter().x - 2.5), (int)(largestTarget.getCenter().y - 2.5), 5, 5);
+         VisualizeShapes.drawPolygon(squareTarget.m_bounds, true, g);
+         g.drawOval((int)(squareTarget.getCenter().x - 2.5), (int)(squareTarget.getCenter().y - 2.5), 5, 5);
       }
 
       m_image = ImageConversion.toMultiSpectral(gImage);
@@ -215,15 +216,16 @@ public class VisionProcessingThread extends Thread{
        *  -bottom right y
        */
       towerData[0] = Constants.TOWER_FLAG;
-      if(largestTarget != null) {
-         towerData[1] = largestTarget.m_bounds.get(0).x;
-         towerData[2] = largestTarget.m_bounds.get(0).y;
-         towerData[3] = largestTarget.m_bounds.get(1).x;
-         towerData[4] = largestTarget.m_bounds.get(1).y;
-         towerData[5] = largestTarget.m_bounds.get(3).x;
-         towerData[6] = largestTarget.m_bounds.get(3).y;
-         towerData[7] = largestTarget.m_bounds.get(2).x;
-         towerData[8] = largestTarget.m_bounds.get(2).y;
+      if(squareTarget != null) {
+         towerData[1] = squareTarget.getCenter().x;
+         towerData[2] = squareTarget.getCenter().y;
+         towerData[3] = encoders[0];
+         towerData[4] = encoders[1];
+         towerData[5] = encoders[2];
+         towerData[6] = encoders[3];
+         for(int i = 7; i < towerData.length; i++){
+             towerData[i] = 0;
+         }
       }
       else {
          for(int i = 1; i < towerData.length; i++){

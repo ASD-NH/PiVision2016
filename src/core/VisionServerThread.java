@@ -22,7 +22,7 @@ public class VisionServerThread extends Thread
     DatagramPacket responsePacket;
     byte[] receivedData; 
     byte[] sendData;
-    int[] decodedData;
+    public static int[] decodedData;
     int[] startArray ={0,0,0,0,0,0,0,0,0};
     int[] requestArray ={3,3,3,3,3,3,3,3,3};
     //# to start from when sequentially trying sockets (for error catching)
