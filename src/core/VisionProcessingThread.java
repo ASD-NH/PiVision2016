@@ -96,11 +96,16 @@ public class VisionProcessingThread extends Thread{
          m_image = m_webcam.getImage();
 
          //the array to send to the rio
-         int[] values;
+         int[] values = null;
          
          //Find the appropriate target
          if (m_target == Constants.TargetType.tower) {
-            values = findTower(VisionServerThread.newDataRequested());
+            if(VisionServerThread.decodedData != null){
+                values = findTower(VisionServerThread.newDataRequested());
+            }
+            else {
+                values = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+            }
          }
          else { //equals ball
             values = findBall();
