@@ -13,14 +13,14 @@ public class VisionServerThread extends Thread
    
    
     private static boolean newDataRequested = false;
-    
+    static int sendCount=0;
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
     public static InetAddress address = null;
     DatagramPacket receivePacket;
     DatagramPacket responsePacket;
-    byte[] receivedData; 
+    public static byte[] receivedData = null; 
     byte[] sendData;
     public static int[] decodedData;
     int[] startArray ={0,0,0,0,0,0,0,0,0};
@@ -67,39 +67,29 @@ public class VisionServerThread extends Thread
             while(running){
                 try{
                     System.out.println("[INFO] Waiting to Receive Packet");
-                    receivedData= new byte[1024];
+                    receivedData= new byte[8];
                     receivePacket = new DatagramPacket(receivedData,receivedData.length);
                     socket.receive(receivePacket);
-                   
+                    
                     address = receivePacket.getAddress();
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
                     
-                    decodedData = NetUtils.byteToInt(receivedData);
+                    //decodedData = NetUtils.byteToInt(receivedData);
                     System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
                     sendData = new byte[1024];
                     
-                    if (Arrays.equals(decodedData,startArray)){
+                    if (sendCount <5){
                         int[] values ={0,0,0,0,0,0,0,0};
                         sendData=NetUtils.intToByte(values);
-                    }
-                    else if (Arrays.equals(decodedData,requestArray)) {
-                       newDataRequested = true;
-                       int[] values = {0,3,3,3,3,3,3,3,3,3};
-                       sendData=NetUtils.intToByte(values);
-                    }
-                    else {
-                        int[] values = {1,2,3,4,5,6,7,8};
-                        sendData=NetUtils.intToByte(values);
-                        
-                       
+                        responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
+                        socket.send(responsePacket);
+                        System.out.println("Packet Sent");
+                        sendCount++;
                     }
                     
-                    
-                    responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
-                    socket.send(responsePacket);
-                    System.out.println("Packet Sent");
+
                 }
                 catch(IOException e){
                     e.printStackTrace();

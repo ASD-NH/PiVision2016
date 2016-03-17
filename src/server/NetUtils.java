@@ -8,7 +8,7 @@ public class NetUtils {
     
     public static byte[] intToByte(int[] values){
         int valueCount=0;
-        byte[] bytes = new byte[(values.length*2)];
+        byte[] bytes = new byte[(values.length*4)];
         for (int i=0;i < bytes.length;i++){
             if (i%2==0){
                 bytes[i]=(byte)(values[valueCount] & 0xff);
@@ -21,24 +21,12 @@ public class NetUtils {
         return bytes;
         
     }
-    public static int[] byteToInt(byte[] bytes){
-       int[] values = new int[9];
-       int currentByte=0;
-       for(int currentInt=0;currentInt <9;currentInt++){
-          values[currentInt]=(int)bytes[currentByte] + ((int)(bytes[currentByte+1])<<8);
-          currentByte+=2;
-       }
-       return values;
-    }
     
-    public static void SendValues(int[] values) {
+    public static void SendValues(byte[] byteData) {
         if (VisionServerThread.address != null){
 
             System.out.println("[INFO] Creating packet");
             DatagramPacket dataPacket;
-            byte[] byteData = new byte[1024];
-
-            byteData = NetUtils.intToByte(values);
 
             dataPacket = new DatagramPacket(byteData, byteData.length,
                   VisionServerThread.address,VisionServerThread.port);

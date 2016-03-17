@@ -92,33 +92,26 @@ public class VisionProcessingThread extends Thread{
 
    public void run() {
       while(m_running) {
-         //m_image is the current webcam image
-         m_image = m_webcam.getImage();
-
-         //the array to send to the rio
-         int[] values = null;
          
-         //Find the appropriate target
-         if (m_target == Constants.TargetType.tower) {
-            if(VisionServerThread.decodedData != null){
-                values = findTower(VisionServerThread.newDataRequested());
-            }
-            else {
-                values = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-            }
-         }
-         else { //equals ball
-            values = findBall();
-         }
-      
-         //System.out.println("values presend" + Arrays.toString(values));
-         //Send data to RIO
-         NetUtils.SendValues(values);
+         //encoder data to append as a timestamp
+         byte[] encoderData = VisionServerThread.receivedData;
+         
+         if (encoderData != null) {
+            //m_image is the current webcam image
+            m_image = m_webcam.getImage();
+            
+            //the array to send to the rio
+            byte[] values = findTower(encoderData);
+            
+            //Send data to RIO
+            NetUtils.SendValues(values);
 
-         if (m_showDisplay) {
-            //update the image on the display
-            m_display.setImageRGB(m_image);
+            if (m_showDisplay) {
+               //update the image on the display
+               m_display.setImageRGB(m_image);
+            }
          }
+         
       }
    }
 
@@ -126,10 +119,9 @@ public class VisionProcessingThread extends Thread{
    
    
    //code to find the tower
-   private int[] findTower(boolean newDataRequested) {
-      int[] towerData = new int[9];
-      int[] encoders = VisionServerThread.decodedData;
-
+   private byte[] findTower(byte[] encoderValues) {
+      int[] towerData = new int[3];
+      
       //image to store thresholded image
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
@@ -151,7 +143,7 @@ public class VisionProcessingThread extends Thread{
             }
          }
       }
-
+      
       //edge detects the thresholded image
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2, true, true, ImageUInt8.class, ImageSInt16.class);
       canny.process(filtered, 0.1f, 0.3f, filtered);
@@ -210,43 +202,35 @@ public class VisionProcessingThread extends Thread{
 
       /*
        * Format for data:
-       *  -tower or ball (tower = 0)
-       *  -top left x
-       *  -top left y
-       *  -top right x
-       *  -top right y
-       *  -bottom left x
-       *  -bottom left y
-       *  -bottom right x
-       *  -bottom right y
+       * [0] - tower flag (1)
+       * [1] - x center
+       * [2] y center
        */
       towerData[0] = Constants.TOWER_FLAG;
       if(squareTarget != null) {
          towerData[1] = squareTarget.getCenter().x;
          towerData[2] = squareTarget.getCenter().y;
-         towerData[3] = encoders[0];
-         towerData[4] = encoders[1];
-         towerData[5] = encoders[2];
-         towerData[6] = encoders[3];
-         for(int i = 7; i < towerData.length; i++){
-             towerData[i] = 0;
-         }
       }
       else {
          for(int i = 1; i < towerData.length; i++){
             towerData[i] = 0;
          }
       }
-
-      m_targetHistory.updateHistory(towerData);
       
-      if (newDataRequested) {
-         towerData[0] = 3;
+      m_targetHistory.updateHistory(towerData);
+      towerData = m_targetHistory.m_currData;
+      System.out.println(Arrays.toString(towerData));
+      
+      byte[] encodedDataFull = new byte[20];
+      byte[] encodedTowerData = NetUtils.intToByte(towerData);
+      for (int i = 0; i < encodedTowerData.length; i++) {
+         encodedDataFull[i] = encodedTowerData[i];
+      }
+      for (int i = 0; i < encoderValues.length; i++) {
+         encodedDataFull[i + 12] = encoderValues[i];
       }
       
-      System.out.println(Arrays.toString(m_targetHistory.m_currData));
-
-      return m_targetHistory.m_currData;
+      return encodedDataFull;
    }
 
    //code to find the ball
