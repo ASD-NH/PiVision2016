@@ -13,7 +13,7 @@ public class VisionServerThread extends Thread
    
    
     private static boolean newDataRequested = false;
-    static int sendCount=0;
+    public static int sendCount=0;
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
@@ -81,7 +81,7 @@ public class VisionServerThread extends Thread
                     sendData = new byte[1024];
                     
                     if (sendCount <5){
-                        int[] values ={0,0,0,0,0,0,0,0};
+                        int[] values ={0,0,0};
                         sendData=NetUtils.intsToBytes(values);
                         responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
                         socket.send(responsePacket);

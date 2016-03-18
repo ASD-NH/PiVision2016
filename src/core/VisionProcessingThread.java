@@ -93,10 +93,11 @@ public class VisionProcessingThread extends Thread{
    public void run() {
       while(m_running) {
          
-         //encoder data to append as a timestamp
-         byte[] encoderData = VisionServerThread.receivedData;
-         
-         if (encoderData != null) {
+         if (VisionServerThread.sendCount > 0) {
+          
+            //encoder data to append as a timestamp
+            byte[] encoderData = VisionServerThread.receivedData;
+            
             //m_image is the current webcam image
             m_image = m_webcam.getImage();
             
