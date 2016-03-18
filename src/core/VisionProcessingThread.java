@@ -222,7 +222,7 @@ public class VisionProcessingThread extends Thread{
       System.out.println(Arrays.toString(towerData));
       
       byte[] encodedDataFull = new byte[20];
-      byte[] encodedTowerData = NetUtils.intToByte(towerData);
+      byte[] encodedTowerData = NetUtils.intsToBytes(towerData);
       for (int i = 0; i < encodedTowerData.length; i++) {
          encodedDataFull[i] = encodedTowerData[i];
       }
