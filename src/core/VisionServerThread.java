@@ -82,7 +82,7 @@ public class VisionServerThread extends Thread
                     
                     if (sendCount <5){
                         int[] values ={0,0,0,0,0,0,0,0};
-                        sendData=NetUtils.intToByte(values);
+                        sendData=NetUtils.intsToBytes(values);
                         responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
                         socket.send(responsePacket);
                         System.out.println("Packet Sent");
