@@ -92,37 +92,37 @@ public class VisionProcessingThread extends Thread{
 
    public void run() {
       while(m_running) {
-         //m_image is the current webcam image
-         m_image = m_webcam.getImage();
+         
+         if (VisionServerThread.sendCount > 0) {
+          
+            //encoder data to append as a timestamp
+            byte[] encoderData = VisionServerThread.receivedData;
+            
+            //m_image is the current webcam image
+            m_image = m_webcam.getImage();
+            
+            //the array to send to the rio
+            byte[] values = findTower(encoderData);
+            
+            //Send data to RIO
+            NetUtils.SendValues(values);
 
-         //the array to send to the rio
-         int[] values;
-
-         //Find the appropriate target
-         if (m_target == Constants.TargetType.tower) {
-            values = findTower();
-         }
-         else { //equals ball
-            values = findBall();
+            if (m_showDisplay) {
+               //update the image on the display
+               m_display.setImageRGB(m_image);
+            }
          }
          
-         //System.out.println("values presend" + Arrays.toString(values));
-         //Send data to RIO
-         NetUtils.SendValues(values);
-
-         if (m_showDisplay) {
-            //update the image on the display
-            m_display.setImageRGB(m_image);
-         }
       }
    }
+
 
    
    
    //code to find the tower
-   private int[] findTower() {
-      int[] towerData = new int[9];
-
+   private byte[] findTower(byte[] encoderValues) {
+      int[] towerData = new int[3];
+      
       //image to store thresholded image
       ImageUInt8 filtered = new ImageUInt8(m_image.width, m_image.height);
 
@@ -144,7 +144,7 @@ public class VisionProcessingThread extends Thread{
             }
          }
       }
-
+      
       //edge detects the thresholded image
       CannyEdge<ImageUInt8, ImageSInt16> canny = FactoryEdgeDetectors.canny(2, true, true, ImageUInt8.class, ImageSInt16.class);
       canny.process(filtered, 0.1f, 0.3f, filtered);
@@ -177,63 +177,61 @@ public class VisionProcessingThread extends Thread{
       }
 
       //we don't want to look for the central target. We should assume the target can be anywhere. tsk tsk
-      TowerTarget largestTarget = null;
+      TowerTarget squareTarget = null;
 
       for(TowerTarget t : targets){
-         if(largestTarget == null){
-            largestTarget = t;
+         if(squareTarget == null){
+            squareTarget = t;
          }
          else {
-            double oldsize = largestTarget.getArea();
-            double newsize = t.getArea();
+            double oldsquare = squareTarget.getSquareness();
+            double newsquare = t.getSquareness();
 
-            if(newsize > oldsize){
-               largestTarget = t;
+            if(newsquare > oldsquare){
+               squareTarget = t;
             }
          }
       }
 
-      if(largestTarget != null && m_showDisplay){
+      if(squareTarget != null && m_showDisplay){
          g.setColor(Color.GREEN);
-         VisualizeShapes.drawPolygon(largestTarget.m_bounds, true, g);
-         g.drawOval((int)(largestTarget.getCenter().x - 2.5), (int)(largestTarget.getCenter().y - 2.5), 5, 5);
+         VisualizeShapes.drawPolygon(squareTarget.m_bounds, true, g);
+         g.drawOval((int)(squareTarget.getCenter().x - 2.5), (int)(squareTarget.getCenter().y - 2.5), 5, 5);
       }
 
       m_image = ImageConversion.toMultiSpectral(gImage);
 
       /*
        * Format for data:
-       *  -tower or ball (tower = 0)
-       *  -top left x
-       *  -top left y
-       *  -top right x
-       *  -top right y
-       *  -bottom left x
-       *  -bottom left y
-       *  -bottom right x
-       *  -bottom right y
+       * [0] - tower flag (1)
+       * [1] - x center
+       * [2] y center
        */
       towerData[0] = Constants.TOWER_FLAG;
-      if(largestTarget != null) {
-         towerData[1] = largestTarget.m_bounds.get(0).x;
-         towerData[2] = largestTarget.m_bounds.get(0).y;
-         towerData[3] = largestTarget.m_bounds.get(1).x;
-         towerData[4] = largestTarget.m_bounds.get(1).y;
-         towerData[5] = largestTarget.m_bounds.get(3).x;
-         towerData[6] = largestTarget.m_bounds.get(3).y;
-         towerData[7] = largestTarget.m_bounds.get(2).x;
-         towerData[8] = largestTarget.m_bounds.get(2).y;
+      if(squareTarget != null) {
+         towerData[1] = squareTarget.getCenter().x;
+         towerData[2] = squareTarget.getCenter().y;
       }
       else {
          for(int i = 1; i < towerData.length; i++){
             towerData[i] = 0;
          }
       }
-
+      
       m_targetHistory.updateHistory(towerData);
-      System.out.println(Arrays.toString(m_targetHistory.m_currData));
-
-      return m_targetHistory.m_currData;
+      towerData = m_targetHistory.m_currData;
+      System.out.println(Arrays.toString(towerData));
+      
+      byte[] encodedDataFull = new byte[20];
+      byte[] encodedTowerData = NetUtils.intsToBytes(towerData);
+      for (int i = 0; i < encodedTowerData.length; i++) {
+         encodedDataFull[i] = encodedTowerData[i];
+      }
+      for (int i = 0; i < encoderValues.length; i++) {
+         encodedDataFull[i + 12] = encoderValues[i];
+      }
+      
+      return encodedDataFull;
    }
 
    //code to find the ball

@@ -4,21 +4,31 @@ import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+<<<<<<< HEAD
 import java.util.*;
+=======
+import java.util.Arrays;
+>>>>>>> bb07d009024f58521acc82d210f1fa10bb072aa1
 
 import server.NetUtils;
 
 public class VisionServerThread extends Thread
 {
+   
+   
+    private static boolean newDataRequested = false;
+    public static int sendCount=0;
     public static DatagramSocket socket = null;
     private boolean running = true;
     public static int port = 00000;
     public static InetAddress address = null;
     DatagramPacket receivePacket;
     DatagramPacket responsePacket;
-    byte[] receivedData; 
+    public static byte[] receivedData = null; 
     byte[] sendData;
-    String decodedData;
+    public static int[] decodedData;
+    int[] startArray ={0,0,0,0,0,0,0,0,0};
+    int[] requestArray ={3,3,3,3,3,3,3,3,3};
     //# to start from when sequentially trying sockets (for error catching)
     private int baseSocket = 31415;
     private int currSocket = baseSocket;
@@ -57,13 +67,15 @@ public class VisionServerThread extends Thread
             return;
         }
         else {
+            
+           
            
             while(running){
                 try{
             
                     
                     System.out.println("[INFO] Waiting to Receive Packet");
-                    receivedData= new byte[1024];
+                    receivedData= new byte[8];
                     receivePacket = new DatagramPacket(receivedData,receivedData.length);
                     socket.receive(receivePacket);
                     
@@ -71,28 +83,22 @@ public class VisionServerThread extends Thread
                     port = receivePacket.getPort();
                     receivedData = receivePacket.getData();
                     
-                    decodedData = new String(receivedData,"UTF-8");
+                    //decodedData = NetUtils.byteToInt(receivedData);
                     System.out.println("Packet Received from: " + address + " on port: " + port + " = " + decodedData + " length of "+ receivePacket.getLength());
                     
                     sendData = new byte[1024];
                     
-                    if(Arrays.equals(exitByteArray,receivedData)){
-                        System.out.println("kill received");
-                        Runtime.getRuntime().exec("shutdown -h now");
-                        System.exit(0);
 
-                    }
-                    else {
-                        int[] values = {1,2,3,4,5,6,7,8};
-                        sendData=NetUtils.intToByte(values);
-                        
-                       
+                    if (sendCount <5){
+                        int[] values ={0,0,0};
+                        sendData=NetUtils.intsToBytes(values);
+                        responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
+                        socket.send(responsePacket);
+                        System.out.println("Packet Sent");
+                        sendCount++;
                     }
                     
-                    
-                    responsePacket = new DatagramPacket(sendData,sendData.length,address,port);
-                    socket.send(responsePacket);
-                    System.out.println("Packet Sent");
+
                 }
                 catch(IOException e){
                     e.printStackTrace();
@@ -100,6 +106,16 @@ public class VisionServerThread extends Thread
               
             }
         }
+    }
+    
+    public static boolean newDataRequested() {
+       if (newDataRequested) {
+          newDataRequested = false;
+          return true;
+       }
+       else {
+          return false;
+       }
     }
 
 }

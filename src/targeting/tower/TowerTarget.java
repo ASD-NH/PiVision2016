@@ -43,6 +43,14 @@ public class TowerTarget extends Target {
         return new PointIndex_I32(centerX, centerY, 0);
     }
     
+    public double getSquareness(){
+        double a = m_bounds.get(0).distance(m_bounds.get(2));
+        double b = m_bounds.get(1).distance(m_bounds.get(3));
+        
+        double squareness = Math.min(a, b) / Math.max(a, b);
+        return squareness;
+    }
+    
     public List<PointIndex_I32> findBounds(Dimension maxSize){
     	return findBounds(maxSize.height, maxSize.width);
     }
