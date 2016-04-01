@@ -4,11 +4,7 @@ import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-<<<<<<< HEAD
 import java.util.*;
-=======
-import java.util.Arrays;
->>>>>>> bb07d009024f58521acc82d210f1fa10bb072aa1
 
 import server.NetUtils;
 

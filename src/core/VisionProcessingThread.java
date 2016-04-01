@@ -218,8 +218,9 @@ public class VisionProcessingThread extends Thread{
          }
       }
       
-      m_targetHistory.updateHistory(towerData);
-      towerData = m_targetHistory.m_currData;
+      //m_targetHistory.updateHistory(towerData);
+      //towerData = m_targetHistory.m_currData;
+      
       System.out.println(Arrays.toString(towerData));
       
       byte[] encodedDataFull = new byte[20];
