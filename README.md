@@ -1,3 +1,5 @@
+*Note: This is a project completed in six weeks during the 2016 build season of our FIRST robotics team, Team Phoenix. It retrieved images from a USB webcam connected to a raspberry pi, processed the image to look for the target/goal, and then sent the position along to the main robot processor.*
+
 # PiVision2016
 
 This is the repository for all java code running on our Raspberry Pi coprocessor during the 2016 build season (Stronghold). This code deals primarily with machine vision, as well as creating a UDP server to send machine vision data to the Rio.
